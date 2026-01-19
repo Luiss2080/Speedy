@@ -12,18 +12,27 @@
       }
     },
     {
-      "label": "Expo: Run Android",
+      "label": "🔧 Fix: Emulator Cold Boot",
       "type": "shell",
-      "command": "npx expo start --android",
+      "command": "& 'C:\\Users\\LuissxD\\AppData\\Local\\Android\\Sdk\\emulator\\emulator.exe' -avd Pixel_7_Pro -no-snapshot-load",
       "isBackground": true,
-      "problemMatcher": ["$expo-metro"],
+      "presentation": {
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "Expo: Start Server (QR)",
+      "type": "shell",
+      "command": "npx expo start",
+      "isBackground": true,
+      "problemMatcher": [],
       "presentation": {
         "group": "expo"
       }
     },
     {
-      "label": "🚀 Dev: Start Android Full",
-      "dependsOn": ["Start Emulator (Pixel 7 Pro)", "Expo: Run Android"],
+      "label": "🚀 Dev: Start (Phone/QR)",
+      "dependsOn": ["Expo: Start Server (QR)"],
       "dependsOrder": "parallel",
       "group": {
         "kind": "build",

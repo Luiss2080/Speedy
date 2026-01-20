@@ -1,0 +1,51 @@
+import { StyleSheet } from "react-native";
+
+export const PerfilEstilos = StyleSheet.create({
+  contenedor: { flex: 1, backgroundColor: "#f4f4f5" },
+  encabezado: {
+    backgroundColor: "#fff",
+    alignItems: "center",
+    paddingVertical: 30,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+    marginBottom: 20,
+  },
+  contenedorAvatar: { marginBottom: 10 },
+  nombre: { fontSize: 24, fontWeight: "bold", color: "#333" },
+  correo: { fontSize: 14, color: "#888", marginBottom: 10 },
+  seccion: {
+    backgroundColor: "#fff",
+    paddingHorizontal: 20,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: "#eee",
+  },
+  tituloSeccion: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#888",
+    marginTop: 15,
+    marginBottom: 10,
+    textTransform: "uppercase",
+  },
+  fila: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  filaIzquierda: { flexDirection: "row", alignItems: "center" },
+  icono: { width: 30, marginRight: 10, textAlign: "center" },
+  textoFila: { fontSize: 16, color: "#333" },
+  botonCerrarSesion: {
+    marginTop: 30,
+    marginHorizontal: 20,
+    backgroundColor: "#ff4d4d",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  textoCerrarSesion: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+});

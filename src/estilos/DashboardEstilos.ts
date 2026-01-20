@@ -1,0 +1,73 @@
+import { StyleSheet } from "react-native";
+
+export const DashboardEstilos = StyleSheet.create({
+  contenedor: { flex: 1, backgroundColor: "#fff" },
+  encabezado: {
+    paddingTop: 60,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  saludo: { fontSize: 24, fontWeight: "bold", color: "#1f2937" },
+  subtitulo: { fontSize: 16, color: "#6b7280" },
+  botonNotificacion: {
+    padding: 10,
+    backgroundColor: "#f3f4f6",
+    borderRadius: 50,
+  },
+  contenedorEstadisticas: {
+    flexDirection: "row",
+    paddingHorizontal: 20,
+    gap: 15,
+    marginBottom: 25,
+  },
+  tarjeta: {
+    flex: 1,
+    padding: 20,
+    borderRadius: 16,
+    justifyContent: "space-between",
+    height: 120,
+  },
+  valorTarjeta: {
+    fontSize: 32,
+    fontWeight: "bold",
+    color: "#fff",
+    marginTop: 10,
+  },
+  etiquetaTarjeta: { fontSize: 14, color: "rgba(255,255,255,0.8)" },
+  tituloSeccion: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#1f2937",
+    marginLeft: 20,
+    marginBottom: 15,
+  },
+  cuadricula: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    paddingHorizontal: 10,
+    marginBottom: 20,
+  },
+  elementoCuadricula: { width: "25%", alignItems: "center", marginBottom: 10 },
+  contenedorIcono: {
+    width: 60,
+    height: 60,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  etiquetaCuadricula: { fontSize: 12, color: "#4b5563", fontWeight: "500" },
+  lista: { paddingHorizontal: 20, paddingBottom: 40 },
+  elementoLista: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3f4f6",
+  },
+  textoLista: { flex: 1, marginLeft: 15, fontSize: 14, color: "#374151" },
+  tiempoLista: { fontSize: 12, color: "#9ca3af" },
+});

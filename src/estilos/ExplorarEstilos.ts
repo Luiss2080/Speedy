@@ -1,0 +1,65 @@
+import { StyleSheet } from "react-native";
+
+export const ExplorarEstilos = StyleSheet.create({
+  contenedor: { flex: 1, backgroundColor: "#f9fafb" },
+  encabezado: {
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    paddingBottom: 20,
+    backgroundColor: "#fff",
+  },
+  titulo: { fontSize: 28, fontWeight: "bold", color: "#111", marginBottom: 15 },
+  contenedorBusqueda: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f3f4f6",
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    height: 50,
+  },
+  iconoBusqueda: { marginRight: 10 },
+  entradaBusqueda: { flex: 1, fontSize: 16, color: "#333" },
+  lista: { padding: 20 },
+  tarjeta: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
+  },
+  encabezadoTarjeta: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  insignia: {
+    backgroundColor: "#eff6ff",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  textoInsignia: { color: "#3b82f6", fontSize: 12, fontWeight: "600" },
+  tituloTarjeta: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#1f2937",
+    marginBottom: 6,
+  },
+  descripcionTarjeta: {
+    fontSize: 14,
+    color: "#6b7280",
+    marginBottom: 15,
+    lineHeight: 20,
+  },
+  pieTarjeta: { flexDirection: "row", alignItems: "center" },
+  textoEnlace: {
+    color: "#3b82f6",
+    fontWeight: "600",
+    fontSize: 14,
+    marginRight: 5,
+  },
+});

@@ -5,7 +5,6 @@ const { width } = Dimensions.get("window");
 export const LoginEstilos = StyleSheet.create({
   fondo: {
     flex: 1,
-    backgroundColor: "#C21833", // Rojo institucional
     alignItems: "center",
     justifyContent: "center",
   },

@@ -1,36 +1,42 @@
 import { FontAwesome5 } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
-import { useEffect } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { LoginEstilos } from "../estilos/LoginEstilos";
-import { initDB, seedDB } from "../servicios/BaseDeDatos";
+
+import { LinearGradient } from "expo-linear-gradient";
+// ... hooks
 
 export default function LoginVista() {
   const router = useRouter();
+  const [usuario, setUsuario] = useState("");
+  const [pin, setPin] = useState("");
 
-  useEffect(() => {
-    // Inicializar base de datos y datos de prueba al cargar el login
-    const setupDB = async () => {
-      try {
-        await initDB();
-        await seedDB();
-      } catch (e) {
-        console.error("Error al inicializar BD:", e);
-      }
-    };
-    setupDB();
-  }, []);
+  // ... useEffect setupDB
+
+  const handleLogin = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    // Validación simple
+    if (usuario.length > 0) {
+      router.replace("/inicio");
+    } else {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      alert("Por favor ingresa un usuario");
+    }
+  };
 
   return (
-    <View style={LoginEstilos.fondo}>
+    <LinearGradient
+      colors={["#9f1239", "#C21833", "#e11d48"]}
+      style={LoginEstilos.fondo}
+    >
       <View style={LoginEstilos.logoContainer}>
-        {/* Placeholder para logo, idealmente una imagen real */}
+        {/* ... logo content ... */}
         <View
           style={[
             LoginEstilos.logoImagen,
             {
-              backgroundColor: "rgba(0,0,0,0.2)",
+              backgroundColor: "rgba(255,255,255,0.2)",
               justifyContent: "center",
               alignItems: "center",
             },
@@ -62,10 +68,12 @@ export default function LoginVista() {
             style={LoginEstilos.input}
             placeholder="Nombre de usuario"
             placeholderTextColor="#9ca3af"
+            value={usuario}
+            onChangeText={setUsuario}
           />
         </View>
 
-        {/* Input PIN (Simulado visualmente) */}
+        {/* Input PIN */}
         <Text style={LoginEstilos.labelPin}>Ingresa tu clave Yape</Text>
         <View style={LoginEstilos.pinContainer}>
           {[1, 2, 3, 4].map((i) => (
@@ -92,18 +100,30 @@ export default function LoginVista() {
           </Text>
         </View>
 
-        {/* Botón Login (oculto en el diseño visual de referencia pero necesario para UX) */}
+        {/* Botón Login con Gradiente */}
         <TouchableOpacity
-          style={[LoginEstilos.botonIngresar, { marginTop: 20 }]}
-          activeOpacity={0.8}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            router.replace("/inicio");
-          }}
+          style={{ width: "100%", marginTop: 20, marginBottom: 20 }}
+          activeOpacity={0.9}
+          onPress={handleLogin}
         >
-          <Text style={LoginEstilos.textoBoton}>INGRESAR</Text>
+          <LinearGradient
+            colors={["#C21833", "#9f1239"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={{
+              paddingVertical: 18,
+              borderRadius: 20,
+              alignItems: "center",
+              shadowColor: "#C21833",
+              shadowOpacity: 0.4,
+              shadowRadius: 10,
+              elevation: 5,
+            }}
+          >
+            <Text style={LoginEstilos.textoBoton}>INGRESAR</Text>
+          </LinearGradient>
         </TouchableOpacity>
       </View>
-    </View>
+    </LinearGradient>
   );
 }

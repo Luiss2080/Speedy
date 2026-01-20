@@ -3,12 +3,14 @@ import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
+import { useCarrito } from "../context/ContextoCarrito";
 import { ProductoEstilos } from "../estilos/ProductoEstilos";
 
 export default function ProductoVista() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const [cantidad, setCantidad] = useState(1);
+  const { agregarItem } = useCarrito();
 
   return (
     <View style={ProductoEstilos.contenedor}>
@@ -57,6 +59,13 @@ export default function ProductoVista() {
           activeOpacity={0.8}
           onPress={() => {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            agregarItem({
+              id: id as string,
+              nombre: "Hamburguesa Doble",
+              precio: 8.5,
+              cantidad: cantidad,
+              restaurante: "Burger King",
+            });
             router.push("/carrito");
           }}
         >

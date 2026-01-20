@@ -1,60 +1,57 @@
-# Plan de Implementación: App de Delivery (Estilo PedidosYa)
+# Plan de Implementación: Rediseño Rojo, Login y Base de Datos
 
-El objetivo es transformar la estructura actual en una aplicación de delivery completa con navegación fluida. Se mantendrán los nombres en español.
+Se aplicará un rediseño completo basado en la tonalidad roja proporcionada, se implementará una pantalla de Login fiel al diseño de referencia y se configurará una base de datos SQLite local para la aplicación.
 
-## Estructura de Navegación Propuesta
+## 1. Rediseño Visual (Tonalidad Roja)
 
-### Navegación Principal (Tabs)
+**Color Principal**: `#C21833` (Rojo Intenso - Estimado de la imagen).
+**Estilo General**: Fondos rojos para pantallas principales/auth, tarjetas blancas redondeadas, texto oscuro sobre blanco.
 
-1.  **Inicio** (`index`): Dashboard principal con categorías, promociones y restaurantes recomendados.
-2.  **Explorar/Buscar** (`explorar`): Buscador avanzado de comida y locales.
-3.  **Pedidos** (`pedidos`): [NUEVO] Historial de pedidos y pedidos en curso.
-4.  **Perfil** (`perfil`): Configuración de usuario, direcciones.
+### Tareas:
 
-### Navegación Secundaria (Stack)
+- **Actualizar Estilos Existentes**: Modificar todos los archivos en `src/estilos/` (Dashboard, Explorar, Perfil, etc.) para reemplazar azules/naranjas con el nuevo rojo corporativo.
+- **Nueva Fuente/Tipografía**: Asegurar consistencia (propiedad visual).
 
-Pantallas a las que se accede desde las pestañas principales:
+## 2. Pantalla de Login (Nueva)
 
-1.  **Detalle de Restaurante** (`restaurante/[id]`): Menú del restaurante, información.
-2.  **Detalle de Producto** (`producto/[id]`): Selección de opciones, cantidad, agregar al carrito.
-3.  **Carrito de Compras** (`carrito`): Resumen de pedido, botón de pagar.
-4.  **Seguimiento de Pedido** (`seguimiento/[id]`): Estado del pedido en tiempo real.
+Implementar una vista que coincida con la imagen de referencia.
 
-## Cambios en Archivos
+### Componentes:
 
-### 1. Nuevas Vistas (`src/vistas`)
+- **Fondo**: Rojo completo (`#C21833`).
+- **Logo/Header**: "Inicio de Sesión", texto de bienvenida.
+- **Tarjeta Central (Blanca)**:
+  - Input Usuario (Icono persona).
+  - Input Contraseña (Estilo PIN o Clave).
+  - Botón "Ingresar" (o validación automática).
+- **Ubicación**: `app/index.tsx` pasará a ser el Login. El Dashboard se moverá a `app/(tabs)`.
 
-- `[NUEVO] PedidosVista.tsx`: Lista de pedidos anteriores y actuales.
-- `[NUEVO] RestauranteVista.tsx`: Header con imagen, lista de categorías y productos.
-- `[NUEVO] ProductoVista.tsx`: Imagen grande, descripción, selector de cantidad.
-- `[NUEVO] CarritoVista.tsx`: Lista de items, subtotal, total, botón pagar.
-- `[NUEVO] SeguimientoVista.tsx`: Mapa (mock) y estado del pedido.
+### Archivos:
 
-### 2. Nuevos Estilos (`src/estilos`)
+- `src/vistas/LoginVista.tsx`: Nueva vista.
+- `src/estilos/LoginEstilos.ts`: Estilos específicos.
+- `app/login.tsx` (o modificar `index.tsx` para redirigir).
 
-- `[NUEVO] PedidosEstilos.ts`
-- `[NUEVO] RestauranteEstilos.ts`
-- `[NUEVO] ProductoEstilos.ts`
-- `[NUEVO] CarritoEstilos.ts`
-- `[NUEVO] SeguimientoEstilos.ts`
+## 3. Base de Datos (SQLite)
 
-### 3. Rutas Expo Router (`app/`)
+Implementar persistencia de datos local para la app de delivery.
 
-- `app/(tabs)/pedidos.tsx`: Nueva pestaña.
-- `app/restaurante/[id].tsx`: Ruta dinámica.
-- `app/producto/[id].tsx`: Ruta dinámica.
-- `app/carrito.tsx`: Pantalla modal o stack.
-- `app/seguimiento/[id].tsx`: Ruta dinámica.
+### Tablas Necesarias:
 
-### 4. Modificaciones
+1.  **usuarios**: id, nombre, email, password, avatar.
+2.  **restaurantes**: id, nombre, descripcion, imagen, calificacion, tiempo_estimado.
+3.  **categorias**: id, nombre, icono, color.
+4.  **productos**: id, restaurante_id, nombre, descripcion, precio, imagen.
+5.  **pedidos**: id, usuario_id, fecha, total, estado.
+6.  **detalle_pedido**: id, pedido_id, producto_id, cantidad, precio_unitario.
 
-- `app/(tabs)/_layout.tsx`: Agregar tab de "Pedidos".
-- `src/vistas/DashboardVista.tsx`: Adaptar para mostrar "Categorías" y "Restaurantes" que lleven a la vista de restaurante.
+### Archivos:
+
+- `src/servicios/BaseDeDatos.ts`: Singleton para inicializar la conexión y crear tablas si no existen.
+- `src/modelos/`: Definiciones de tipos/interfaces.
 
 ## Pasos de Ejecución
 
-1.  Crear las nuevas vistas y sus estilos correspondientes en `src/`.
-2.  Crear los archivos de ruta en `app/` conectando con las vistas.
-3.  Actualizar el `_layout.tsx` de tabs.
-4.  Modificar `DashboardVista` para incluir navegación a `RestauranteVista`.
-5.  Verificar el flujo completo: Inicio -> Restaurante -> Producto -> Carrito.
+1.  **Base de Datos**: Crear el servicio de BD e inicializar tablas.
+2.  **Login**: Crear vista y estilos. Configurar navegación para que sea la primera pantalla.
+3.  **Rediseño Global**: Actualizar los estilos de las vistas existentes para usar la nueva paleta de colores.

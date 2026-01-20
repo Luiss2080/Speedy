@@ -1,5 +1,5 @@
-import DashboardVista from "../../src/vistas/DashboardVista";
+import LoginVista from "../src/vistas/LoginVista";
 
-export default function DashboardRoute() {
-  return <DashboardVista />;
+export default function Index() {
+  return <LoginVista />;
 }

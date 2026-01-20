@@ -1,0 +1,131 @@
+import { Dimensions, StyleSheet } from "react-native";
+
+const { width } = Dimensions.get("window");
+
+export const LoginEstilos = StyleSheet.create({
+  fondo: {
+    flex: 1,
+    backgroundColor: "#C21833", // Rojo institucional
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logoContainer: {
+    alignItems: "center",
+    marginBottom: 40,
+  },
+  logoImagen: {
+    width: 120,
+    height: 120,
+    resizeMode: "contain",
+    marginBottom: 20,
+    borderRadius: 15,
+  },
+  titulo: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#fff",
+    marginBottom: 5,
+  },
+  subtitulo: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.8)",
+    textAlign: "center",
+    paddingHorizontal: 40,
+  },
+  tarjeta: {
+    width: width * 0.9,
+    backgroundColor: "#fff",
+    borderRadius: 30,
+    padding: 30,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 8,
+  },
+  tarjetaTitulo: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#1f2937",
+    marginBottom: 10,
+  },
+  tarjetaSubtitulo: {
+    fontSize: 14,
+    color: "#6b7280",
+    textAlign: "center",
+    marginBottom: 30,
+  },
+  inputContainer: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    height: 55,
+    marginBottom: 25,
+    backgroundColor: "#f9fafb",
+  },
+  inputIcono: {
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: "#374151",
+  },
+  labelPin: {
+    fontSize: 14,
+    color: "#4b5563",
+    marginBottom: 15,
+    fontWeight: "500",
+  },
+  pinContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 10,
+    marginBottom: 30,
+    width: "100%",
+  },
+  pinInput: {
+    width: 50,
+    height: 50,
+    borderWidth: 1.5,
+    borderColor: "#C21833",
+    borderRadius: 12,
+    textAlign: "center",
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#C21833",
+    backgroundColor: "#fff0f0",
+  },
+  botonIngresar: {
+    width: "100%",
+    backgroundColor: "#C21833",
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  textoBoton: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  footerNota: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f3f4f6",
+    padding: 10,
+    borderRadius: 8,
+    width: "100%",
+  },
+  textoNota: {
+    fontSize: 12,
+    color: "#6b7280",
+    marginLeft: 10,
+    flex: 1,
+  },
+});

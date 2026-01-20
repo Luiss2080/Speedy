@@ -39,29 +39,112 @@ export default function DashboardVista() {
         ))}
       </View>
 
-      {/* Actions Grid */}
-      <Text style={DashboardEstilos.tituloSeccion}>Acciones Rápidas</Text>
+      {/* Categories Grid */}
+      <Text style={DashboardEstilos.tituloSeccion}>¿Qué se te antoja hoy?</Text>
       <View style={DashboardEstilos.cuadricula}>
-        {acciones.map((accion) => (
+        {[
+          {
+            id: "1",
+            titulo: "Hamburguesas",
+            icono: "hamburger",
+            color: "#ffedd5",
+            colorIcono: "#c2410c",
+          },
+          {
+            id: "2",
+            titulo: "Pizza",
+            icono: "pizza-slice",
+            color: "#fee2e2",
+            colorIcono: "#b91c1c",
+          },
+          {
+            id: "3",
+            titulo: "Sushi",
+            icono: "fish",
+            color: "#dcfce7",
+            colorIcono: "#15803d",
+          },
+          {
+            id: "4",
+            titulo: "Postres",
+            icono: "ice-cream",
+            color: "#f3e8ff",
+            colorIcono: "#7e22ce",
+          },
+        ].map((cat) => (
           <TouchableOpacity
-            key={accion.id}
+            key={cat.id}
             style={DashboardEstilos.elementoCuadricula}
           >
             <View
               style={[
                 DashboardEstilos.contenedorIcono,
-                { backgroundColor: accion.colorFondo },
+                { backgroundColor: cat.color },
               ]}
             >
-              <FontAwesome5
-                name={accion.icono}
-                size={24}
-                color={accion.colorIcono}
-              />
+              <FontAwesome5 name={cat.icono} size={24} color={cat.colorIcono} />
             </View>
             <Text style={DashboardEstilos.etiquetaCuadricula}>
-              {accion.titulo}
+              {cat.titulo}
             </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* Recommended Restaurants - Replacing Actions */}
+      <Text style={DashboardEstilos.tituloSeccion}>Restaurantes Favoritos</Text>
+      <View style={{ paddingHorizontal: 20, marginBottom: 20 }}>
+        {[
+          {
+            id: "1",
+            nombre: "Burger King",
+            desc: "Hamburguesas • 30 min",
+            color: "#fff0f0",
+          },
+          {
+            id: "2",
+            nombre: "Pizza Hut",
+            desc: "Italiana • 45 min",
+            color: "#fffbeb",
+          },
+        ].map((rest) => (
+          <TouchableOpacity
+            key={rest.id}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              padding: 15,
+              backgroundColor: rest.color,
+              marginBottom: 10,
+              borderRadius: 12,
+            }}
+            onPress={() => router.push(`/restaurante/${rest.id}`)}
+          >
+            <View
+              style={{
+                width: 50,
+                height: 50,
+                backgroundColor: "#eee",
+                borderRadius: 25,
+                marginRight: 15,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <FontAwesome5 name="store" size={20} color="#666" />
+            </View>
+            <View>
+              <Text style={{ fontWeight: "bold", fontSize: 16 }}>
+                {rest.nombre}
+              </Text>
+              <Text style={{ color: "#666", fontSize: 14 }}>{rest.desc}</Text>
+            </View>
+            <FontAwesome5
+              name="chevron-right"
+              size={14}
+              color="#ccc"
+              style={{ marginLeft: "auto" }}
+            />
           </TouchableOpacity>
         ))}
       </View>

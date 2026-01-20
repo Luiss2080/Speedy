@@ -1,8 +1,5 @@
-import { FontAwesome5 } from "@expo/vector-icons";
-import { Stack, useRouter } from "expo-router";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { useDashboardControlador } from "../controladores/useDashboardControlador";
-import { DashboardEstilos } from "../estilos/DashboardEstilos";
+import { LinearGradient } from "expo-linear-gradient";
+// ... imports
 
 export default function DashboardVista() {
   const router = useRouter();
@@ -13,8 +10,11 @@ export default function DashboardVista() {
     <ScrollView style={DashboardEstilos.contenedor}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* Header Section */}
-      <View style={DashboardEstilos.encabezado}>
+      {/* Header with Gradient */}
+      <LinearGradient
+        colors={["#C21833", "#9f1239"]}
+        style={DashboardEstilos.encabezado}
+      >
         <View>
           <Text style={DashboardEstilos.saludo}>{saludo}</Text>
           <Text style={DashboardEstilos.subtitulo}>
@@ -22,9 +22,9 @@ export default function DashboardVista() {
           </Text>
         </View>
         <TouchableOpacity style={DashboardEstilos.botonNotificacion}>
-          <FontAwesome5 name="bell" size={20} color="#333" />
+          <FontAwesome5 name="bell" size={20} color="#C21833" />
         </TouchableOpacity>
-      </View>
+      </LinearGradient>
 
       {/* Stats Cards */}
       <View style={DashboardEstilos.contenedorEstadisticas}>

@@ -1,6 +1,7 @@
 import { FontAwesome5 } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { LoginEstilos } from "../estilos/LoginEstilos";
 

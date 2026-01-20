@@ -5,16 +5,19 @@ export const DashboardEstilos = StyleSheet.create({
   encabezado: {
     paddingTop: 60,
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingBottom: 30,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    marginBottom: 20,
   },
-  saludo: { fontSize: 24, fontWeight: "bold", color: "#C21833" },
-  subtitulo: { fontSize: 16, color: "#6b7280" },
+  saludo: { fontSize: 24, fontWeight: "bold", color: "#fff" },
+  subtitulo: { fontSize: 16, color: "rgba(255,255,255,0.8)" },
   botonNotificacion: {
     padding: 10,
-    backgroundColor: "#ffe4e6",
+    backgroundColor: "#fff",
     borderRadius: 50,
   },
   contenedorEstadisticas: {

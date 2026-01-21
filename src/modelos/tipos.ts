@@ -35,6 +35,12 @@ export interface Recurso {
   imagen: string; // URL o nombre de asset local
 }
 
+export interface Extra {
+  id: string;
+  nombre: string;
+  precio: number;
+}
+
 export interface Producto {
   id: string;
   nombre: string;
@@ -42,6 +48,9 @@ export interface Producto {
   precio: number;
   imagen: string;
   restaurante: string;
+  calorias?: number;
+  tiempoPreparacion?: string;
+  extrasDisponibles?: Extra[];
 }
 
 export interface ItemCarrito {
@@ -50,4 +59,6 @@ export interface ItemCarrito {
   precio: number;
   cantidad: number;
   restaurante: string;
+  extrasSeleccionados?: Extra[];
+  instrucciones?: string;
 }

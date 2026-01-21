@@ -1,12 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
-
-type ItemCarrito = {
-  id: string;
-  nombre: string;
-  precio: number;
-  cantidad: number;
-  restaurante: string;
-};
+import { ItemCarrito } from "../modelos/tipos";
 
 type ContextoCarritoType = {
   items: ItemCarrito[];

@@ -1,10 +1,14 @@
+import { FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-// ... imports
+import { Stack, useRouter } from "expo-router";
+import React from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useDashboardControlador } from "../controladores/useDashboardControlador";
+import { DashboardEstilos } from "../estilos/DashboardEstilos";
 
 export default function DashboardVista() {
   const router = useRouter();
-  const { estadisticas, acciones, actividades, saludo } =
-    useDashboardControlador();
+  const { estadisticas, actividades, saludo } = useDashboardControlador();
 
   return (
     <ScrollView style={DashboardEstilos.contenedor}>
@@ -23,7 +27,7 @@ export default function DashboardVista() {
         </View>
         <TouchableOpacity
           style={DashboardEstilos.botonNotificacion}
-          onPress={() => router.push("/notificaciones")}
+          onPress={() => router.push("/notificaciones" as any)}
         >
           <FontAwesome5 name="bell" size={20} color="#C21833" />
         </TouchableOpacity>
@@ -36,7 +40,7 @@ export default function DashboardVista() {
             key={stat.id}
             style={[DashboardEstilos.tarjeta, { backgroundColor: stat.color }]}
           >
-            <FontAwesome5 name={stat.icono} size={24} color="#fff" />
+            <FontAwesome5 name={stat.icono as any} size={24} color="#fff" />
             <Text style={DashboardEstilos.valorTarjeta}>{stat.valor}</Text>
             <Text style={DashboardEstilos.etiquetaTarjeta}>{stat.titulo}</Text>
           </View>
@@ -86,7 +90,11 @@ export default function DashboardVista() {
                 { backgroundColor: cat.color },
               ]}
             >
-              <FontAwesome5 name={cat.icono} size={24} color={cat.colorIcono} />
+              <FontAwesome5
+                name={cat.icono as any}
+                size={24}
+                color={cat.colorIcono}
+              />
             </View>
             <Text style={DashboardEstilos.etiquetaCuadricula}>
               {cat.titulo}
@@ -122,7 +130,7 @@ export default function DashboardVista() {
               marginBottom: 10,
               borderRadius: 12,
             }}
-            onPress={() => router.push(`/restaurante/${rest.id}`)}
+            onPress={() => router.push(("/restaurante/" + rest.id) as any)}
           >
             <View
               style={{
@@ -158,7 +166,7 @@ export default function DashboardVista() {
       <View style={DashboardEstilos.lista}>
         {actividades.map((act) => (
           <View key={act.id} style={DashboardEstilos.elementoLista}>
-            <FontAwesome5 name={act.icono} size={16} color="#666" />
+            <FontAwesome5 name={act.icono as any} size={16} color="#666" />
             <Text style={DashboardEstilos.textoLista}>{act.descripcion}</Text>
             <Text style={DashboardEstilos.tiempoLista}>{act.tiempo}</Text>
           </View>

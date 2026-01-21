@@ -34,3 +34,20 @@ export interface Recurso {
   categoria: string;
   imagen: string; // URL o nombre de asset local
 }
+
+export interface Producto {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  precio: number;
+  imagen: string;
+  restaurante: string;
+}
+
+export interface ItemCarrito {
+  id: string;
+  nombre: string;
+  precio: number;
+  cantidad: number;
+  restaurante: string;
+}

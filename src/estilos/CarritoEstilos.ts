@@ -22,7 +22,15 @@ export const CarritoEstilos = StyleSheet.create({
     borderRadius: 4,
     marginRight: 10,
   },
-  itemNombre: { fontSize: 16, color: "#374151" },
+  itemNombre: { fontSize: 16, fontWeight: "600", color: "#374151" },
+  itemDetalles: { marginTop: 4 },
+  textoExtra: { fontSize: 12, color: "#6b7280" },
+  textoInstruccion: {
+    fontSize: 12,
+    color: "#C21833",
+    fontStyle: "italic",
+    marginTop: 2,
+  },
   itemPrecio: { fontSize: 16, fontWeight: "bold", color: "#374151" },
   resumen: { backgroundColor: "#fff", padding: 20, marginTop: 20 },
   filaResumen: {

@@ -7,6 +7,7 @@ type ContextoCarritoType = {
   removerItem: (id: string) => void;
   total: number;
   limpiarCarrito: () => void;
+  cantidadItems: number;
 };
 
 const ContextoCarrito = createContext<ContextoCarritoType | undefined>(
@@ -45,9 +46,18 @@ export const CarritoProvider = ({
     0,
   );
 
+  const cantidadItems = items.reduce((acc, item) => acc + item.cantidad, 0);
+
   return (
     <ContextoCarrito.Provider
-      value={{ items, agregarItem, removerItem, total, limpiarCarrito }}
+      value={{
+        items,
+        agregarItem,
+        removerItem,
+        total,
+        limpiarCarrito,
+        cantidadItems,
+      }}
     >
       {children}
     </ContextoCarrito.Provider>

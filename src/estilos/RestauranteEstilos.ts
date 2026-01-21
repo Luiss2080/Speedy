@@ -25,9 +25,30 @@ export const RestauranteEstilos = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#1f2937",
-    marginTop: 20,
     marginBottom: 15,
     marginLeft: 20,
+  },
+  contenedorCategorias: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  categoriaItem: {
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: "#f3f4f6",
+    marginRight: 10,
+  },
+  categoriaItemActivo: {
+    backgroundColor: "#C21833",
+  },
+  textoCategoria: {
+    fontSize: 14,
+    color: "#4b5563",
+    fontWeight: "600",
+  },
+  textoCategoriaActivo: {
+    color: "#fff",
   },
   listaProductos: { paddingHorizontal: 20 },
   productoTarjeta: {

@@ -1,72 +1,108 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useRestauranteControlador } from "../controladores/useRestauranteControlador";
 import { RestauranteEstilos } from "../estilos/RestauranteEstilos";
 
-const productosMock = [
-  {
-    id: "1",
-    nombre: "Hamburguesa Doble",
-    descripcion: "Doble carne, queso cheddar, bacon.",
-    precio: "$8.50",
-  },
-  {
-    id: "2",
-    nombre: "Papas Fritas",
-    descripcion: "Porción grande con salsa especial.",
-    precio: "$3.50",
-  },
-  {
-    id: "3",
-    nombre: "Refresco",
-    descripcion: "Coca-Cola 500ml.",
-    precio: "$1.50",
-  },
-];
-
 export default function RestauranteVista() {
-  const { id } = useLocalSearchParams();
-  const router = useRouter();
+  const {
+    restaurante,
+    categorias,
+    categoriaSeleccionada,
+    setCategoriaSeleccionada,
+    productos,
+    router,
+  } = useRestauranteControlador();
 
   return (
-    <ScrollView style={RestauranteEstilos.contenedor}>
-      <Image
-        source={{
-          uri: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-        }}
-        style={RestauranteEstilos.imagenPortada}
-      />
+    <ScrollView style={RestauranteEstilos.contenedor} stickyHeaderIndices={[2]}>
+      {/* Header Image */}
+      <View style={{ position: "relative" }}>
+        <Image
+          source={{ uri: restaurante.imagen }}
+          style={RestauranteEstilos.imagenPortada}
+        />
+        <TouchableOpacity
+          style={{
+            position: "absolute",
+            top: 50,
+            left: 20,
+            backgroundColor: "white",
+            padding: 8,
+            borderRadius: 20,
+          }}
+          onPress={() => router.back()}
+        >
+          <FontAwesome5 name="arrow-left" size={20} color="black" />
+        </TouchableOpacity>
+      </View>
 
       <View style={RestauranteEstilos.infoContenedor}>
-        <Text style={RestauranteEstilos.nombre}>Restaurante #{id}</Text>
+        <Text style={RestauranteEstilos.nombre}>{restaurante.nombre}</Text>
         <View style={RestauranteEstilos.metaInfo}>
-          <Text style={RestauranteEstilos.calificacion}>⭐ 4.5</Text>
+          <Text style={RestauranteEstilos.calificacion}>
+            ⭐ {restaurante.calificacion}
+          </Text>
           <Text style={RestauranteEstilos.tiempo}>
-            • 30-45 min • Envío $2.00
+            • {restaurante.tiempo} • Envío ${restaurante.envio.toFixed(2)}
           </Text>
         </View>
       </View>
 
-      <Text style={RestauranteEstilos.tituloSeccion}>Menú Popular</Text>
+      {/* Categories - Sticky */}
+      <View style={{ backgroundColor: "#fff", paddingVertical: 10 }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={RestauranteEstilos.contenedorCategorias}
+        >
+          {categorias.map((cat) => (
+            <TouchableOpacity
+              key={cat}
+              style={[
+                RestauranteEstilos.categoriaItem,
+                categoriaSeleccionada === cat &&
+                  RestauranteEstilos.categoriaItemActivo,
+              ]}
+              onPress={() => setCategoriaSeleccionada(cat)}
+            >
+              <Text
+                style={[
+                  RestauranteEstilos.textoCategoria,
+                  categoriaSeleccionada === cat &&
+                    RestauranteEstilos.textoCategoriaActivo,
+                ]}
+              >
+                {cat}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
+      <Text style={RestauranteEstilos.tituloSeccion}>Menú</Text>
 
       <View style={RestauranteEstilos.listaProductos}>
-        {productosMock.map((prod) => (
+        {productos.map((prod) => (
           <TouchableOpacity
             key={prod.id}
             style={RestauranteEstilos.productoTarjeta}
-            onPress={() => router.push(`/producto/${prod.id}`)}
+            onPress={() => router.push(("/producto/" + prod.id) as any)}
           >
             <View style={RestauranteEstilos.productoInfo}>
               <Text style={RestauranteEstilos.productoNombre}>
                 {prod.nombre}
               </Text>
-              <Text style={RestauranteEstilos.productoDesc}>
+              <Text style={RestauranteEstilos.productoDesc} numberOfLines={2}>
                 {prod.descripcion}
               </Text>
               <Text style={RestauranteEstilos.productoPrecio}>
-                {prod.precio}
+                ${prod.precio.toFixed(2)}
               </Text>
             </View>
-            <View style={RestauranteEstilos.productoImagen} />
+            <Image
+              source={{ uri: prod.imagen }}
+              style={RestauranteEstilos.productoImagen}
+            />
           </TouchableOpacity>
         ))}
       </View>

@@ -3,12 +3,12 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useRouter } from "expo-router";
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { useDashboardControlador } from "../controladores/useDashboardControlador";
-import { DashboardEstilos } from "../estilos/DashboardEstilos";
+import { useCarrito } from "../context/ContextoCarrito";
 
 export default function DashboardVista() {
   const router = useRouter();
   const { estadisticas, actividades, saludo } = useDashboardControlador();
+  const { cantidadItems } = useCarrito();
 
   return (
     <ScrollView style={DashboardEstilos.contenedor}>
@@ -25,12 +25,43 @@ export default function DashboardVista() {
             Bienvenido a tu Dashboard
           </Text>
         </View>
-        <TouchableOpacity
-          style={DashboardEstilos.botonNotificacion}
-          onPress={() => router.push("/notificaciones" as any)}
-        >
-          <FontAwesome5 name="bell" size={20} color="#C21833" />
-        </TouchableOpacity>
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <TouchableOpacity
+            style={DashboardEstilos.botonNotificacion}
+            onPress={() => router.push("/carrito" as any)}
+          >
+            <FontAwesome5 name="shopping-cart" size={20} color="#C21833" />
+            {cantidadItems > 0 && (
+              <View
+                style={{
+                  position: "absolute",
+                  top: -5,
+                  right: -5,
+                  backgroundColor: "#ef4444",
+                  width: 18,
+                  height: 18,
+                  borderRadius: 9,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  borderWidth: 2,
+                  borderColor: "#fff",
+                }}
+              >
+                <Text
+                  style={{ color: "#fff", fontSize: 10, fontWeight: "bold" }}
+                >
+                  {cantidadItems}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={DashboardEstilos.botonNotificacion}
+            onPress={() => router.push("/notificaciones" as any)}
+          >
+            <FontAwesome5 name="bell" size={20} color="#C21833" />
+          </TouchableOpacity>
+        </View>
       </LinearGradient>
 
       {/* Stats Cards */}

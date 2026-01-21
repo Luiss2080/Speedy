@@ -5,7 +5,10 @@ import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   Alert,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
+  SafeAreaView,
   ScrollView,
   Text,
   TextInput,
@@ -61,17 +64,26 @@ export default function DireccionesVista() {
         colors={["#C21833", "#9f1239"]}
         style={DireccionesEstilos.encabezado}
       >
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={{ marginRight: 15 }}
+        <SafeAreaView style={{ backgroundColor: "transparent" }}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingHorizontal: 20,
+              paddingTop: 10,
+            }}
           >
-            <FontAwesome5 name="arrow-left" size={20} color="#fff" />
-          </TouchableOpacity>
-          <Text style={DireccionesEstilos.tituloEncabezado}>
-            Mis Direcciones
-          </Text>
-        </View>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={{ marginRight: 15 }}
+            >
+              <FontAwesome5 name="arrow-left" size={20} color="#fff" />
+            </TouchableOpacity>
+            <Text style={DireccionesEstilos.tituloEncabezado}>
+              Mis Direcciones
+            </Text>
+          </View>
+        </SafeAreaView>
       </LinearGradient>
 
       <ScrollView contentContainerStyle={DireccionesEstilos.lista}>
@@ -130,7 +142,8 @@ export default function DireccionesVista() {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{
             flex: 1,
             justifyContent: "flex-end",
@@ -143,94 +156,98 @@ export default function DireccionesVista() {
               borderTopLeftRadius: 20,
               borderTopRightRadius: 20,
               padding: 20,
-              height: "60%",
+              maxHeight: "80%", // Limit height so it doesn't cover full screen unwieldily
             }}
           >
-            <Text
-              style={{
-                fontSize: 20,
-                fontWeight: "bold",
-                marginBottom: 20,
-                color: "#333",
-              }}
-            >
-              Nueva Dirección
-            </Text>
-
-            <Text style={{ marginBottom: 5, fontWeight: "600" }}>
-              Nombre (Ej: Casa, Trabajo)
-            </Text>
-            <TextInput
-              style={{
-                borderWidth: 1,
-                borderColor: "#ddd",
-                borderRadius: 10,
-                padding: 10,
-                marginBottom: 15,
-                backgroundColor: "#f9f9f9",
-              }}
-              placeholder="Ej: Casa"
-              value={nuevoTitulo}
-              onChangeText={setNuevoTitulo}
-            />
-
-            <Text style={{ marginBottom: 5, fontWeight: "600" }}>
-              Dirección exacta
-            </Text>
-            <TextInput
-              style={{
-                borderWidth: 1,
-                borderColor: "#ddd",
-                borderRadius: 10,
-                padding: 10,
-                marginBottom: 15,
-                backgroundColor: "#f9f9f9",
-              }}
-              placeholder="Av. Principal 123"
-              value={nuevaDireccion}
-              onChangeText={setNuevaDireccion}
-            />
-
-            <Text style={{ marginBottom: 5, fontWeight: "600" }}>
-              Referencia (Opcional)
-            </Text>
-            <TextInput
-              style={{
-                borderWidth: 1,
-                borderColor: "#ddd",
-                borderRadius: 10,
-                padding: 10,
-                marginBottom: 20,
-                backgroundColor: "#f9f9f9",
-              }}
-              placeholder="Frente al parque..."
-              value={nuevaReferencia}
-              onChangeText={setNuevaReferencia}
-            />
-
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#C21833",
-                padding: 15,
-                borderRadius: 10,
-                alignItems: "center",
-                marginBottom: 10,
-              }}
-              onPress={guardarDireccion}
-            >
-              <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>
-                Guardar Dirección
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <Text
+                style={{
+                  fontSize: 20,
+                  fontWeight: "bold",
+                  marginBottom: 20,
+                  color: "#333",
+                }}
+              >
+                Nueva Dirección
               </Text>
-            </TouchableOpacity>
 
-            <TouchableOpacity
-              style={{ padding: 15, alignItems: "center" }}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={{ color: "#666", fontSize: 16 }}>Cancelar</Text>
-            </TouchableOpacity>
+              <Text style={{ marginBottom: 5, fontWeight: "600" }}>
+                Nombre (Ej: Casa, Trabajo)
+              </Text>
+              <TextInput
+                style={{
+                  borderWidth: 1,
+                  borderColor: "#ddd",
+                  borderRadius: 10,
+                  padding: 10,
+                  marginBottom: 15,
+                  backgroundColor: "#f9f9f9",
+                }}
+                placeholder="Ej: Casa"
+                value={nuevoTitulo}
+                onChangeText={setNuevoTitulo}
+              />
+
+              <Text style={{ marginBottom: 5, fontWeight: "600" }}>
+                Dirección exacta
+              </Text>
+              <TextInput
+                style={{
+                  borderWidth: 1,
+                  borderColor: "#ddd",
+                  borderRadius: 10,
+                  padding: 10,
+                  marginBottom: 15,
+                  backgroundColor: "#f9f9f9",
+                }}
+                placeholder="Av. Principal 123"
+                value={nuevaDireccion}
+                onChangeText={setNuevaDireccion}
+              />
+
+              <Text style={{ marginBottom: 5, fontWeight: "600" }}>
+                Referencia (Opcional)
+              </Text>
+              <TextInput
+                style={{
+                  borderWidth: 1,
+                  borderColor: "#ddd",
+                  borderRadius: 10,
+                  padding: 10,
+                  marginBottom: 20,
+                  backgroundColor: "#f9f9f9",
+                }}
+                placeholder="Frente al parque..."
+                value={nuevaReferencia}
+                onChangeText={setNuevaReferencia}
+              />
+
+              <TouchableOpacity
+                style={{
+                  backgroundColor: "#C21833",
+                  padding: 15,
+                  borderRadius: 10,
+                  alignItems: "center",
+                  marginBottom: 10,
+                }}
+                onPress={guardarDireccion}
+              >
+                <Text
+                  style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}
+                >
+                  Guardar Dirección
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={{ padding: 15, alignItems: "center", marginBottom: 20 }}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={{ color: "#666", fontSize: 16 }}>Cancelar</Text>
+              </TouchableOpacity>
+            </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );

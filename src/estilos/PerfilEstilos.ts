@@ -5,7 +5,7 @@ export const PerfilEstilos = StyleSheet.create({
   encabezado: {
     backgroundColor: "#fff",
     alignItems: "center",
-    paddingVertical: 40,
+    paddingVertical: 20, // Reduced from 40
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
     shadowColor: "#000",

@@ -1,9 +1,12 @@
 -- Script de Configuración MySQL para 'Speedy'
 -- Instrucciones: Importar este archivo en phpMyAdmin o ejecutar en consola MySQL.
+
 -- 1. Crear Base de Datos
 CREATE DATABASE IF NOT EXISTS Speedy;
 USE Speedy;
+
 -- 2. Crear Tablas
+
 CREATE TABLE IF NOT EXISTS usuarios (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(255) NOT NULL,
@@ -11,12 +14,14 @@ CREATE TABLE IF NOT EXISTS usuarios (
   password VARCHAR(255) NOT NULL,
   avatar VARCHAR(255)
 );
+
 CREATE TABLE IF NOT EXISTS categorias (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(100) NOT NULL,
   icono VARCHAR(50) NOT NULL,
   color VARCHAR(20) NOT NULL
 );
+
 CREATE TABLE IF NOT EXISTS restaurantes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(255) NOT NULL,
@@ -28,6 +33,7 @@ CREATE TABLE IF NOT EXISTS restaurantes (
   envio DECIMAL(10,2) DEFAULT 0.00,
   FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE SET NULL
 );
+
 CREATE TABLE IF NOT EXISTS productos (
   id INT AUTO_INCREMENT PRIMARY KEY,
   restaurante_id INT NOT NULL,
@@ -38,6 +44,7 @@ CREATE TABLE IF NOT EXISTS productos (
   categoria VARCHAR(100),
   FOREIGN KEY (restaurante_id) REFERENCES restaurantes(id) ON DELETE CASCADE
 );
+
 CREATE TABLE IF NOT EXISTS direcciones (
   id INT AUTO_INCREMENT PRIMARY KEY,
   usuario_id INT DEFAULT 1,
@@ -47,6 +54,7 @@ CREATE TABLE IF NOT EXISTS direcciones (
   icono VARCHAR(50) DEFAULT 'map-marker',
   FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
+
 CREATE TABLE IF NOT EXISTS pedidos (
   id INT AUTO_INCREMENT PRIMARY KEY,
   usuario_id INT NOT NULL,
@@ -56,6 +64,7 @@ CREATE TABLE IF NOT EXISTS pedidos (
   restaurante VARCHAR(255),
   FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
+
 CREATE TABLE IF NOT EXISTS detalle_pedido (
   id INT AUTO_INCREMENT PRIMARY KEY,
   pedido_id INT NOT NULL,
@@ -65,7 +74,13 @@ CREATE TABLE IF NOT EXISTS detalle_pedido (
   FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE,
   FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE
 );
+
 -- 3. Insertar Datos de Prueba (Seeders)
+
+-- USUARIOS (IMPORTANTE: Debe insertarse ANTES que direcciones o pedidos)
+INSERT INTO usuarios (nombre, email, password, avatar) VALUES 
+('Usuario Test', 'demo@user.com', 'demo123', 'user-circle');
+
 -- Categorías
 INSERT INTO categorias (nombre, icono, color) VALUES 
 ('Hamburguesas', 'hamburger', '#ffedd5'), 
@@ -73,6 +88,7 @@ INSERT INTO categorias (nombre, icono, color) VALUES
 ('Sushi', 'fish', '#dcfce7'),
 ('Postres', 'ice-cream', '#f3e8ff'),
 ('Bebidas', 'glass-cheers', '#e0f2fe');
+
 -- Restaurantes
 INSERT INTO restaurantes (nombre, descripcion, imagen, calificacion, tiempo_estimado, categoria_id, envio) VALUES
 ('Burger King', 'Hamburguesas a la parrilla', 'https://images.unsplash.com/photo-1571091718767-18b5b1457add', 4.5, '30-40 min', 1, 5.0),
@@ -85,6 +101,7 @@ INSERT INTO restaurantes (nombre, descripcion, imagen, calificacion, tiempo_esti
 ('Starbucks', 'Café y postres', 'https://images.unsplash.com/photo-1509042239860-f550ce710b93', 4.6, '15 min', 5, 2.0),
 ('Dunkin Donuts', 'Donas y cafe', 'https://images.unsplash.com/photo-1551024601-563799a6327c', 4.5, '20 min', 4, 3.0),
 ('Gelarti', 'Helados gourmet', 'https://images.unsplash.com/photo-1563805042-7684c019e1cb', 4.7, '25 min', 4, 4.5);
+
 -- Productos
 INSERT INTO productos (restaurante_id, nombre, descripcion, precio, imagen, categoria) VALUES
 (1, 'Whopper Doble', 'Doble carne, queso, lechuga, tomate', 18.50, 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd', 'Hamburguesas'),
@@ -107,10 +124,8 @@ INSERT INTO productos (restaurante_id, nombre, descripcion, precio, imagen, cate
 (2, 'McFlurry Oreo', 'Helado de vainilla con galleta', 8.50, 'https://images.unsplash.com/photo-1563805042-7684c019e1cb', 'Postres'),
 (3, 'Inka Cola 1.5L', 'La bebida del Perú', 9.00, 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97', 'Bebidas'),
 (4, 'Pan de Ajo', '6 unidades con queso', 12.00, 'https://images.unsplash.com/photo-1573140247632-f84660f67126', 'Combos');
+
 -- Direcciones
 INSERT INTO direcciones (usuario_id, titulo, direccion, referencia) VALUES
 (1, 'Casa', 'Av. Larco 123, Miraflores', 'Frente al parque'),
 (1, 'Oficina', 'Calle Begonias 450, San Isidro', 'Piso 5');
--- Usuario demo
-INSERT INTO usuarios (nombre, email, password, avatar) VALUES 
-('Usuario Test', 'demo@user.com', 'demo123', 'user-circle');

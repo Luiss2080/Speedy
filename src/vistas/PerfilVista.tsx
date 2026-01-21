@@ -1,5 +1,5 @@
 import { FontAwesome } from "@expo/vector-icons";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { Switch, Text, TouchableOpacity, View } from "react-native";
 import { usePerfilControlador } from "../controladores/usePerfilControlador";
 import { PerfilEstilos } from "../estilos/PerfilEstilos";

@@ -29,7 +29,8 @@ export const useRestauranteControlador = () => {
       imagen:
         "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
       restaurante: "Burger King",
-      extrasDisponibles: [], // Simplified for list
+      categoria: "Hamburguesas",
+      extrasDisponibles: [],
     },
     {
       id: "2",
@@ -39,6 +40,7 @@ export const useRestauranteControlador = () => {
       imagen:
         "https://images.unsplash.com/photo-1573080496987-a199f8cd4054?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
       restaurante: "Burger King",
+      categoria: "Combos",
     },
     {
       id: "3",
@@ -48,11 +50,14 @@ export const useRestauranteControlador = () => {
       imagen:
         "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
       restaurante: "Burger King",
+      categoria: "Bebidas",
     },
   ];
 
   const productosFiltrados =
-    categoriaSeleccionada === "Todos" ? productos : productos; // In a real app, filter by category property
+    categoriaSeleccionada === "Todos"
+      ? productos
+      : productos.filter((p) => p.categoria === categoriaSeleccionada);
 
   return {
     restaurante,

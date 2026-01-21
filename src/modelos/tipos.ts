@@ -51,6 +51,7 @@ export interface Producto {
   calorias?: number;
   tiempoPreparacion?: string;
   extrasDisponibles?: Extra[];
+  categoria?: string;
 }
 
 export interface ItemCarrito {

@@ -1,10 +1,11 @@
-import { FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useCarritoControlador } from "../controladores/useCarritoControlador";
 import { CarritoEstilos } from "../estilos/CarritoEstilos";
 
 export default function CarritoVista() {
   const {
+    // ... values
     items,
     subtotal,
     costoEnvio,
@@ -15,8 +16,16 @@ export default function CarritoVista() {
     seguirComprando,
   } = useCarritoControlador();
 
+  // ... (keeping return content mostly same until summary)
+
+  // Skipping map rendering for brevity in this instruction, focusing on replacing the SUMMARY section
+  // BUT I need to replace a contiguous block, so I will target the summary block specifically if possible,
+  // or the whole file if I must. The diff tool works best with precise target.
+  // I will target the summary block using surrounding lines.
+
   return (
     <View style={CarritoEstilos.contenedor}>
+      {/* ... header ... */}
       <View
         style={[
           CarritoEstilos.encabezado,
@@ -56,6 +65,7 @@ export default function CarritoVista() {
           </View>
         ) : (
           items.map((item) => (
+            // ... item item ...
             <View key={item.id} style={CarritoEstilos.item}>
               <View style={[CarritoEstilos.itemInfo, { flex: 1 }]}>
                 <Text style={CarritoEstilos.cantidadBadge}>
@@ -64,7 +74,6 @@ export default function CarritoVista() {
                 <View style={{ flex: 1 }}>
                   <Text style={CarritoEstilos.itemNombre}>{item.nombre}</Text>
 
-                  {/* Extras Display */}
                   {item.extrasSeleccionados &&
                     item.extrasSeleccionados.length > 0 && (
                       <View style={CarritoEstilos.itemDetalles}>
@@ -76,7 +85,6 @@ export default function CarritoVista() {
                       </View>
                     )}
 
-                  {/* Instructions Display */}
                   {item.instrucciones ? (
                     <Text style={CarritoEstilos.textoInstruccion}>
                       "{item.instrucciones}"
@@ -112,18 +120,42 @@ export default function CarritoVista() {
         {items.length > 0 && (
           <View style={CarritoEstilos.resumen}>
             <View style={CarritoEstilos.filaResumen}>
-              <Text style={CarritoEstilos.textoResumen}>Subtotal</Text>
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+              >
+                <MaterialCommunityIcons
+                  name="clipboard-text-outline"
+                  size={16}
+                  color="#6b7280"
+                />
+                <Text style={CarritoEstilos.textoResumen}>Subtotal</Text>
+              </View>
               <Text style={CarritoEstilos.textoResumen}>
                 ${subtotal.toFixed(2)}
               </Text>
             </View>
             <View style={CarritoEstilos.filaResumen}>
-              <Text style={CarritoEstilos.textoResumen}>Envío</Text>
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+              >
+                <MaterialCommunityIcons name="bike" size={16} color="#6b7280" />
+                <Text style={CarritoEstilos.textoResumen}>Envío</Text>
+              </View>
               <Text style={CarritoEstilos.textoResumen}>
                 ${costoEnvio.toFixed(2)}
               </Text>
             </View>
-            <View style={CarritoEstilos.filaResumen}>
+            <View
+              style={[
+                CarritoEstilos.filaResumen,
+                {
+                  marginTop: 10,
+                  borderTopWidth: 1,
+                  borderTopColor: "#f1f5f9",
+                  paddingTop: 10,
+                },
+              ]}
+            >
               <Text style={CarritoEstilos.textoTotal}>Total</Text>
               <Text style={CarritoEstilos.textoTotal}>
                 ${totalPagar.toFixed(2)}

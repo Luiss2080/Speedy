@@ -10,23 +10,23 @@ export const LoginEstilos = StyleSheet.create({
   },
   logoContainer: {
     alignItems: "center",
-    marginBottom: 40,
+    marginBottom: 20, // Reduced from 40
   },
   logoImagen: {
-    width: 120,
-    height: 120,
+    width: 90, // Reduced from 120
+    height: 90,
     resizeMode: "contain",
-    marginBottom: 20,
+    marginBottom: 10, // Reduced from 20
     borderRadius: 15,
   },
   titulo: {
-    fontSize: 28,
+    fontSize: 24, // Reduced from 28
     fontWeight: "bold",
     color: "#fff",
     marginBottom: 5,
   },
   subtitulo: {
-    fontSize: 14,
+    fontSize: 13, // Reduced from 14
     color: "rgba(255, 255, 255, 0.8)",
     textAlign: "center",
     paddingHorizontal: 40,
@@ -34,8 +34,8 @@ export const LoginEstilos = StyleSheet.create({
   tarjeta: {
     width: width * 0.9,
     backgroundColor: "#fff",
-    borderRadius: 32,
-    padding: 35,
+    borderRadius: 24, // Slightly reduced radius
+    padding: 25, // Reduced from 35
     alignItems: "center",
     shadowColor: "#C21833",
     shadowOpacity: 0.15,
@@ -44,17 +44,17 @@ export const LoginEstilos = StyleSheet.create({
     elevation: 10,
   },
   tarjetaTitulo: {
-    fontSize: 24,
+    fontSize: 20, // Reduced from 24
     fontWeight: "800",
     color: "#1f2937",
-    marginBottom: 8,
+    marginBottom: 5,
   },
   tarjetaSubtitulo: {
-    fontSize: 15,
+    fontSize: 14,
     color: "#9ca3af",
     textAlign: "center",
-    marginBottom: 35,
-    lineHeight: 22,
+    marginBottom: 20, // Reduced from 35
+    lineHeight: 20,
   },
   inputContainer: {
     width: "100%",
@@ -63,9 +63,9 @@ export const LoginEstilos = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#f3f4f6",
     borderRadius: 16,
-    paddingHorizontal: 20,
-    height: 60,
-    marginBottom: 25,
+    paddingHorizontal: 15,
+    height: 50, // Reduced from 60
+    marginBottom: 15, // Reduced from 25
     backgroundColor: "#f9fafb",
     shadowColor: "#000",
     shadowOpacity: 0.03,
@@ -78,30 +78,30 @@ export const LoginEstilos = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 15, // Reduced from 16
     color: "#374151",
   },
   labelPin: {
     fontSize: 14,
     color: "#4b5563",
-    marginBottom: 15,
+    marginBottom: 10, // Reduced from 15
     fontWeight: "500",
   },
   pinContainer: {
     flexDirection: "row",
     justifyContent: "center",
     gap: 10,
-    marginBottom: 30,
+    marginBottom: 20, // Reduced from 30
     width: "100%",
   },
   pinInput: {
-    width: 50,
-    height: 50,
+    width: 45, // Reduced from 50
+    height: 45,
     borderWidth: 1.5,
     borderColor: "#C21833",
     borderRadius: 12,
     textAlign: "center",
-    fontSize: 24,
+    fontSize: 20, // Reduced from 24
     fontWeight: "bold",
     color: "#C21833",
     backgroundColor: "#fff0f0",
@@ -109,10 +109,10 @@ export const LoginEstilos = StyleSheet.create({
   botonIngresar: {
     width: "100%",
     backgroundColor: "#C21833",
-    paddingVertical: 18,
+    paddingVertical: 15, // Reduced from 18
     borderRadius: 20,
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 15, // Reduced from 20
     shadowColor: "#C21833",
     shadowOpacity: 0.4,
     shadowRadius: 10,
@@ -121,7 +121,7 @@ export const LoginEstilos = StyleSheet.create({
   },
   textoBoton: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 16, // Reduced from 18
     fontWeight: "bold",
     letterSpacing: 0.5,
   },
@@ -129,12 +129,12 @@ export const LoginEstilos = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#f3f4f6",
-    padding: 10,
+    padding: 8, // Reduced from 10
     borderRadius: 8,
     width: "100%",
   },
   textoNota: {
-    fontSize: 12,
+    fontSize: 11, // Reduced from 12
     color: "#6b7280",
     marginLeft: 10,
     flex: 1,

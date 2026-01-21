@@ -1,8 +1,14 @@
-import { FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useRouter } from "expo-router";
 import React from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useCarrito } from "../context/ContextoCarrito";
 import { useDashboardControlador } from "../controladores/useDashboardControlador";
 import { DashboardEstilos } from "../estilos/DashboardEstilos";
@@ -21,48 +27,83 @@ export default function DashboardVista() {
         colors={["#C21833", "#9f1239"]}
         style={DashboardEstilos.encabezado}
       >
-        <View>
-          <Text style={DashboardEstilos.saludo}>{saludo}</Text>
-          <Text style={DashboardEstilos.subtitulo}>
-            Bienvenido a tu Dashboard
-          </Text>
-        </View>
-        <View style={{ flexDirection: "row", gap: 10 }}>
-          <TouchableOpacity
-            style={DashboardEstilos.botonNotificacion}
-            onPress={() => router.push("/carrito" as any)}
+        <View style={{ marginBottom: 15 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 20,
+            }}
           >
-            <FontAwesome5 name="shopping-cart" size={20} color="#C21833" />
-            {cantidadItems > 0 && (
-              <View
-                style={{
-                  position: "absolute",
-                  top: -5,
-                  right: -5,
-                  backgroundColor: "#ef4444",
-                  width: 18,
-                  height: 18,
-                  borderRadius: 9,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  borderWidth: 2,
-                  borderColor: "#fff",
-                }}
+            <View>
+              <Text style={DashboardEstilos.saludo}>{saludo}</Text>
+              <Text style={DashboardEstilos.subtitulo}>
+                ¿Qué vas a pedir hoy?
+              </Text>
+            </View>
+
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <TouchableOpacity
+                style={DashboardEstilos.botonNotificacion}
+                onPress={() => router.push("/carrito" as any)}
               >
-                <Text
-                  style={{ color: "#fff", fontSize: 10, fontWeight: "bold" }}
-                >
-                  {cantidadItems}
-                </Text>
-              </View>
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={DashboardEstilos.botonNotificacion}
-            onPress={() => router.push("/notificaciones" as any)}
+                <FontAwesome5 name="shopping-cart" size={20} color="#C21833" />
+                {cantidadItems > 0 && (
+                  <View
+                    style={{
+                      position: "absolute",
+                      top: -5,
+                      right: -5,
+                      backgroundColor: "#ef4444",
+                      width: 18,
+                      height: 18,
+                      borderRadius: 9,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      borderWidth: 2,
+                      borderColor: "#fff",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: "#fff",
+                        fontSize: 10,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {cantidadItems}
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={DashboardEstilos.botonNotificacion}
+                onPress={() => router.push("/notificaciones" as any)}
+              >
+                <FontAwesome5 name="bell" size={20} color="#C21833" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Search Bar */}
+          <View
+            style={{
+              flexDirection: "row",
+              backgroundColor: "#fff",
+              borderRadius: 15,
+              paddingHorizontal: 15,
+              paddingVertical: 10,
+              alignItems: "center",
+            }}
           >
-            <FontAwesome5 name="bell" size={20} color="#C21833" />
-          </TouchableOpacity>
+            <FontAwesome5 name="search" size={16} color="#9ca3af" />
+            <TextInput
+              placeholder="Buscar comida, restaurantes..."
+              style={{ flex: 1, marginLeft: 10, color: "#1f2937" }}
+              placeholderTextColor="#9ca3af"
+            />
+          </View>
         </View>
       </LinearGradient>
 
@@ -80,42 +121,71 @@ export default function DashboardVista() {
         ))}
       </View>
 
-      {/* Categories Grid */}
-      <Text style={DashboardEstilos.tituloSeccion}>¿Qué se te antoja hoy?</Text>
+      {/* Categories Grid - MaterialCommunityIcons */}
+      <Text style={DashboardEstilos.tituloSeccion}>Categorías</Text>
       <View style={DashboardEstilos.cuadricula}>
         {[
           {
             id: "1",
-            titulo: "Hamburguesas",
+            titulo: "Burgers",
             icono: "hamburger",
             color: "#ffedd5",
             colorIcono: "#c2410c",
           },
           {
             id: "2",
-            titulo: "Pizza",
-            icono: "pizza-slice",
+            titulo: "Italiana",
+            icono: "pizza",
             color: "#fee2e2",
             colorIcono: "#b91c1c",
           },
           {
             id: "3",
-            titulo: "Sushi",
-            icono: "fish",
+            titulo: "Asiática",
+            icono: "noodles",
             color: "#dcfce7",
             colorIcono: "#15803d",
           },
           {
             id: "4",
             titulo: "Postres",
-            icono: "ice-cream",
+            icono: "cupcake",
             color: "#f3e8ff",
             colorIcono: "#7e22ce",
+          },
+          {
+            id: "5",
+            titulo: "Bebidas",
+            icono: "glass-cocktail",
+            color: "#e0f2fe",
+            colorIcono: "#0369a1",
+          },
+          {
+            id: "6",
+            titulo: "Tacos",
+            icono: "taco",
+            color: "#fef9c3",
+            colorIcono: "#a16207",
+          },
+          {
+            id: "7",
+            titulo: "Sandwich",
+            icono: "bread-slice",
+            color: "#fae8ff",
+            colorIcono: "#a21caf",
+          },
+          {
+            id: "8",
+            titulo: "Más",
+            icono: "dots-horizontal",
+            color: "#f3f4f6",
+            colorIcono: "#4b5563",
           },
         ].map((cat) => (
           <TouchableOpacity
             key={cat.id}
             style={DashboardEstilos.elementoCuadricula}
+            onPress={() => router.push("/explorar" as any)}
           >
             <View
               style={[
@@ -123,9 +193,9 @@ export default function DashboardVista() {
                 { backgroundColor: cat.color },
               ]}
             >
-              <FontAwesome5
+              <MaterialCommunityIcons
                 name={cat.icono as any}
-                size={24}
+                size={28}
                 color={cat.colorIcono}
               />
             </View>

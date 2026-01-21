@@ -1,4 +1,4 @@
-import { FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import {
   Image,
@@ -37,6 +37,16 @@ export default function ProductoVista() {
             source={{ uri: producto.imagen }}
             style={ProductoEstilos.imagen}
           />
+          <View
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 100,
+              backgroundColor: "rgba(0,0,0,0.3)",
+            }}
+          />
           <TouchableOpacity
             style={ProductoEstilos.botonAtras}
             onPress={() => router.back()}
@@ -47,10 +57,9 @@ export default function ProductoVista() {
             style={ProductoEstilos.botonFavorito}
             onPress={toggleFavorito}
           >
-            <FontAwesome5
-              name="heart"
-              solid={esFavorito}
-              size={20}
+            <MaterialCommunityIcons
+              name={esFavorito ? "heart" : "heart-outline"}
+              size={24}
               color={esFavorito ? "#ef4444" : "#1f2937"}
             />
           </TouchableOpacity>
@@ -69,7 +78,7 @@ export default function ProductoVista() {
           <View style={ProductoEstilos.metaInfo}>
             {producto.calorias && (
               <View style={ProductoEstilos.etiquetaMeta}>
-                <FontAwesome5 name="fire" size={12} color="#f97316" />
+                <MaterialCommunityIcons name="fire" size={16} color="#f97316" />
                 <Text style={ProductoEstilos.textoMeta}>
                   {producto.calorias} kcal
                 </Text>
@@ -77,7 +86,11 @@ export default function ProductoVista() {
             )}
             {producto.tiempoPreparacion && (
               <View style={ProductoEstilos.etiquetaMeta}>
-                <FontAwesome5 name="clock" size={12} color="#3b82f6" />
+                <MaterialCommunityIcons
+                  name="clock-outline"
+                  size={16}
+                  color="#3b82f6"
+                />
                 <Text style={ProductoEstilos.textoMeta}>
                   {producto.tiempoPreparacion}
                 </Text>

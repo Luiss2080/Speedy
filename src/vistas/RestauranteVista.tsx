@@ -1,4 +1,4 @@
-import { FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useCarrito } from "../context/ContextoCarrito";
 import { useRestauranteControlador } from "../controladores/useRestauranteControlador";
@@ -28,6 +28,16 @@ export default function RestauranteVista() {
             source={{ uri: restaurante.imagen }}
             style={RestauranteEstilos.imagenPortada}
           />
+          <View
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 100,
+              backgroundColor: "rgba(0,0,0,0.3)",
+            }}
+          />
           <TouchableOpacity
             style={{
               position: "absolute",
@@ -45,13 +55,77 @@ export default function RestauranteVista() {
 
         <View style={RestauranteEstilos.infoContenedor}>
           <Text style={RestauranteEstilos.nombre}>{restaurante.nombre}</Text>
-          <View style={RestauranteEstilos.metaInfo}>
-            <Text style={RestauranteEstilos.calificacion}>
-              ⭐ {restaurante.calificacion}
-            </Text>
-            <Text style={RestauranteEstilos.tiempo}>
-              • {restaurante.tiempo} • Envío ${restaurante.envio.toFixed(2)}
-            </Text>
+          <View style={{ flexDirection: "row", gap: 15, marginTop: 10 }}>
+            {/* Rating */}
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: "#fffbeb",
+                paddingHorizontal: 8,
+                paddingVertical: 4,
+                borderRadius: 12,
+              }}
+            >
+              <MaterialCommunityIcons name="star" size={16} color="#f59e0b" />
+              <Text
+                style={{ fontWeight: "bold", marginLeft: 4, color: "#b45309" }}
+              >
+                {restaurante.calificacion}
+              </Text>
+            </View>
+
+            {/* Time */}
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: "#f3f4f6",
+                paddingHorizontal: 8,
+                paddingVertical: 4,
+                borderRadius: 12,
+              }}
+            >
+              <MaterialCommunityIcons
+                name="clock-outline"
+                size={16}
+                color="#4b5563"
+              />
+              <Text
+                style={{
+                  fontWeight: "600",
+                  marginLeft: 4,
+                  color: "#4b5563",
+                  fontSize: 12,
+                }}
+              >
+                {restaurante.tiempo}
+              </Text>
+            </View>
+
+            {/* Delivery */}
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: "#ecfdf5",
+                paddingHorizontal: 8,
+                paddingVertical: 4,
+                borderRadius: 12,
+              }}
+            >
+              <MaterialCommunityIcons name="bike" size={16} color="#059669" />
+              <Text
+                style={{
+                  fontWeight: "600",
+                  marginLeft: 4,
+                  color: "#059669",
+                  fontSize: 12,
+                }}
+              >
+                ${restaurante.envio.toFixed(2)}
+              </Text>
+            </View>
           </View>
         </View>
 

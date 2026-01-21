@@ -45,7 +45,7 @@ export default function FavoritosVista() {
               onPress={() => router.push(`/producto/${fav.id}`)}
             >
               <Image
-                source={{ uri: fav.img }}
+                source={{ uri: fav.imagen }}
                 style={FavoritosEstilos.imagen}
               />
               <View style={FavoritosEstilos.botonCorazon}>

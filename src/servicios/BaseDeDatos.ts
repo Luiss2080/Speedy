@@ -1,14 +1,28 @@
-// BaseDeDatos.ts - API Client Configuration
+import Constants from "expo-constants";
 import { Platform } from "react-native";
 
-// Android Emulator sees 'localhost' as 10.0.2.2
-// For physical devices, you must use your computer's LAN IP (e.g., 192.168.1.XX)
-const API_URL =
-  Platform.OS === "android"
-    ? "http://10.0.2.2:3000/api"
-    : "http://localhost:3000/api";
+const getApiUrl = () => {
+  // 1. Si estamos en Web o no hay hostUri (prod?), usar localhost
+  if (Platform.OS === "web") return "http://localhost:3000/api";
 
-console.log(`📡 Conectando a API: ${API_URL}`);
+  // 2. Intentar obtener la IP del debugger (Metro Bundler)
+  const debuggerHost = Constants.expoConfig?.hostUri;
+  const localhost = debuggerHost?.split(":")[0];
+
+  if (localhost) {
+    // Devuelve la IP de tu PC (ej: 192.168.1.15)
+    return `http://${localhost}:3000/api`;
+  }
+
+  // 3. Fallback para emulador Android si falla lo anterior
+  if (Platform.OS === "android") return "http://10.0.2.2:3000/api";
+
+  // 4. Fallback final (iOS simulator o error)
+  return "http://localhost:3000/api";
+};
+
+const API_URL = getApiUrl();
+console.log(`📡 Conectando a API Backend en: ${API_URL}`);
 
 // --- INITIALIZATION (No longer creates tables locally) ---
 export const initDB = async () => {

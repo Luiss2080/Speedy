@@ -2,7 +2,12 @@ import { StyleSheet } from "react-native";
 
 export const CarritoEstilos = StyleSheet.create({
   contenedor: { flex: 1, backgroundColor: "#f9fafb" },
-  encabezado: { padding: 20, backgroundColor: "#fff", alignItems: "center" },
+  encabezado: {
+    padding: 20,
+    paddingTop: 60,
+    backgroundColor: "#fff",
+    alignItems: "center",
+  },
   titulo: { fontSize: 20, fontWeight: "bold", color: "#1f2937" },
   lista: { padding: 20 },
   item: {

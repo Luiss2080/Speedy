@@ -4,8 +4,9 @@ export const PerfilEstilos = StyleSheet.create({
   contenedor: { flex: 1, backgroundColor: "#f4f4f5" },
   encabezado: {
     backgroundColor: "#fff",
+    paddingTop: 60,
     alignItems: "center",
-    paddingVertical: 20, // Reduced from 40
+    paddingVertical: 20,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
     shadowColor: "#000",

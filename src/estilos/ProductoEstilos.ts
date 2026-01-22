@@ -9,7 +9,7 @@ export const ProductoEstilos = StyleSheet.create({
   imagen: { width: width, height: 300, resizeMode: "cover" },
   botonAtras: {
     position: "absolute",
-    top: 50,
+    top: 60,
     left: 20,
     backgroundColor: "rgba(255,255,255,0.9)",
     padding: 10,
@@ -18,7 +18,7 @@ export const ProductoEstilos = StyleSheet.create({
   },
   botonFavorito: {
     position: "absolute",
-    top: 50,
+    top: 60,
     right: 20,
     backgroundColor: "rgba(255,255,255,0.9)",
     padding: 10,

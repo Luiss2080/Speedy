@@ -3,6 +3,7 @@ import { StyleSheet } from "react-native";
 export const DetalleEstilos = StyleSheet.create({
   contenedor: { flex: 1, backgroundColor: "#fff", padding: 20 },
   encabezado: {
+    paddingTop: 60,
     marginBottom: 30,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",

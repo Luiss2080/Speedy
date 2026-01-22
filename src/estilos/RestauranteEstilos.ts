@@ -4,7 +4,7 @@ const { width } = Dimensions.get("window");
 
 export const RestauranteEstilos = StyleSheet.create({
   contenedor: { flex: 1, backgroundColor: "#fff" },
-  imagenPortada: { width: width, height: 200, resizeMode: "cover" },
+  imagenPortada: { width: width, height: 250, resizeMode: "cover" }, // Increased height
   infoContenedor: {
     padding: 20,
     marginTop: -20,

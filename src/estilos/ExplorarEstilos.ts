@@ -4,7 +4,7 @@ export const ExplorarEstilos = StyleSheet.create({
   contenedor: { flex: 1, backgroundColor: "#f9fafb" },
   encabezado: {
     paddingHorizontal: 20,
-    paddingTop: 10, // Reduced from 60
+    paddingTop: 60,
     paddingBottom: 20,
     backgroundColor: "#fff",
   },

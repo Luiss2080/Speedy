@@ -15,6 +15,7 @@ export default function ProductoVista() {
   const router = useRouter();
   const {
     producto,
+    loading,
     cantidad,
     instrucciones,
     setInstrucciones,
@@ -27,6 +28,19 @@ export default function ProductoVista() {
     esFavorito,
     toggleFavorito,
   } = useProductoControlador();
+
+  if (loading || !producto) {
+    return (
+      <View
+        style={[
+          ProductoEstilos.contenedor,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <Text>Cargando producto...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={ProductoEstilos.contenedor}>

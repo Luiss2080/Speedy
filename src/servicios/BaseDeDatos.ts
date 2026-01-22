@@ -89,6 +89,17 @@ export const getProductosTodos = async () => {
   }
 };
 
+export const getProductoDetalle = async (id: string | number) => {
+  try {
+    const response = await fetch(`${API_URL}/productos/${id}`);
+    if (!response.ok) throw new Error("Error fetching producto detalle");
+    return await response.json();
+  } catch (error) {
+    console.error("API Error (Producto Detalle):", error);
+    return null;
+  }
+};
+
 export const getDirecciones = async () => {
   try {
     // Hardcoded user 1 for demo

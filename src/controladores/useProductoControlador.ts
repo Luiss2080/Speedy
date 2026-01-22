@@ -1,13 +1,18 @@
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useCarrito } from "../context/ContextoCarrito";
 import { useFavoritos } from "../context/ContextoFavoritos";
 import { Producto } from "../modelos/tipos";
+import { getProductoDetalle } from "../servicios/BaseDeDatos";
 
 export const useProductoControlador = () => {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+
+  const [loading, setLoading] = useState(true);
+  const [producto, setProducto] = useState<Producto | null>(null);
+
   const [cantidad, setCantidad] = useState(1);
   const [instrucciones, setInstrucciones] = useState("");
   const [extrasSeleccionados, setExtrasSeleccionados] = useState<string[]>([]);
@@ -16,27 +21,28 @@ export const useProductoControlador = () => {
     useFavoritos();
   const { agregarItem } = useCarrito();
 
-  // Mock product data - in a real app this would come from an API or database
-  const producto: Producto = {
-    id: id as string,
-    nombre: "Hamburguesa Doble",
-    descripcion:
-      "Deliciosa hamburguesa con doble carne 100% vacuna, queso cheddar fundido, tocino crujiente, cebolla caramelizada y nuestra salsa especial de la casa.",
-    precio: 8.5,
-    imagen:
-      "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-    restaurante: "Burger King",
-    calorias: 850,
-    tiempoPreparacion: "15-20 min",
-    extrasDisponibles: [
-      { id: "e1", nombre: "Queso Extra", precio: 1.5 },
-      { id: "e2", nombre: "Tocino Extra", precio: 2.0 },
-      { id: "e3", nombre: "Pepinillos Picantes", precio: 0.5 },
-      { id: "e4", nombre: "Salsa BBQ", precio: 0.75 },
-    ],
-  };
+  useEffect(() => {
+    const cargarProducto = async () => {
+      if (!id) return;
+      setLoading(true);
+      const data = await getProductoDetalle(id as string);
+      if (data) {
+        // Ensure numbers are numbers (MySQL sometimes returns strings for decimals)
+        data.precio = parseFloat(data.precio);
+        if (data.extrasDisponibles) {
+          data.extrasDisponibles = data.extrasDisponibles.map((e: any) => ({
+            ...e,
+            precio: parseFloat(e.precio),
+          }));
+        }
+        setProducto(data);
+      }
+      setLoading(false);
+    };
+    cargarProducto();
+  }, [id]);
 
-  const esFavorito = checkEsFavorito(producto.id);
+  const esFavorito = producto ? checkEsFavorito(producto.id) : false;
 
   const incrementarCantidad = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -63,6 +69,7 @@ export const useProductoControlador = () => {
   };
 
   const precioUnitarioConExtras = useMemo(() => {
+    if (!producto) return 0;
     const costoExtras =
       producto.extrasDisponibles
         ?.filter((e) => extrasSeleccionados.includes(e.id))
@@ -73,6 +80,7 @@ export const useProductoControlador = () => {
   const total = (precioUnitarioConExtras * cantidad).toFixed(2);
 
   const agregarAlCarrito = () => {
+    if (!producto) return;
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
     // Obtener objetos Extra completos
@@ -81,11 +89,11 @@ export const useProductoControlador = () => {
     );
 
     agregarItem({
-      id: producto.id + Date.now(), // ID único para el carrito por si hay variantes
+      id: producto.id + Date.now().toString(), // Improved unique ID
       nombre: producto.nombre,
       precio: precioUnitarioConExtras,
       cantidad: cantidad,
-      restaurante: producto.restaurante,
+      restaurante: producto.restaurante || "Restaurante", // Safe fallback
       extrasSeleccionados: extrasObj,
       instrucciones: instrucciones.trim(),
     });
@@ -94,6 +102,7 @@ export const useProductoControlador = () => {
 
   return {
     producto,
+    loading,
     cantidad,
     instrucciones,
     setInstrucciones,

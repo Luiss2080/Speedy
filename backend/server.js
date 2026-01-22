@@ -72,6 +72,43 @@ app.get("/api/productos", async (req, res) => {
   }
 });
 
+// 3.1 Producto Individual (Detalle + Extras Mock)
+app.get("/api/productos/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await pool.query("SELECT * FROM productos WHERE id = ?", [
+      id,
+    ]);
+
+    if (rows.length === 0)
+      return res.status(404).json({ error: "Producto no encontrado" });
+
+    const producto = rows[0];
+
+    // Mock Extras based on category (Simple logic for demo)
+    let extras = [];
+    if (
+      producto.categoria === "Hamburguesas" ||
+      producto.categoria === "Combos"
+    ) {
+      extras = [
+        { id: "e1", nombre: "Queso Extra", precio: 1.5 },
+        { id: "e2", nombre: "Tocino", precio: 2.0 },
+        { id: "e3", nombre: "Papas Grandes", precio: 3.5 },
+      ];
+    } else if (producto.categoria === "Pizza") {
+      extras = [
+        { id: "e4", nombre: "Queso Borde", precio: 4.0 },
+        { id: "e5", nombre: "Peperoni Extra", precio: 2.5 },
+      ];
+    }
+
+    res.json({ ...producto, extrasDisponibles: extras });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // 4. Direcciones
 app.get("/api/direcciones", async (req, res) => {
   try {

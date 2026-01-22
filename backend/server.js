@@ -72,38 +72,42 @@ app.get("/api/productos", async (req, res) => {
   }
 });
 
-// 3.1 Producto Individual (Detalle + Extras Mock)
+// 3.1 Producto Individual (Con Opciones/Extras Reales)
 app.get("/api/productos/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const [rows] = await pool.query("SELECT * FROM productos WHERE id = ?", [
-      id,
-    ]);
-
-    if (rows.length === 0)
-      return res.status(404).json({ error: "Producto no encontrado" });
-
+    
+    // 1. Get Product
+    const [rows] = await pool.query("SELECT * FROM productos WHERE id = ?", [id]);
+    if (rows.length === 0) return res.status(404).json({ error: "Producto no encontrado" });
     const producto = rows[0];
 
-    // Mock Extras based on category (Simple logic for demo)
-    let extras = [];
-    if (
-      producto.categoria === "Hamburguesas" ||
-      producto.categoria === "Combos"
-    ) {
-      extras = [
-        { id: "e1", nombre: "Queso Extra", precio: 1.5 },
-        { id: "e2", nombre: "Tocino", precio: 2.0 },
-        { id: "e3", nombre: "Papas Grandes", precio: 3.5 },
-      ];
-    } else if (producto.categoria === "Pizza") {
-      extras = [
-        { id: "e4", nombre: "Queso Borde", precio: 4.0 },
-        { id: "e5", nombre: "Peperoni Extra", precio: 2.5 },
-      ];
+    // 2. Get Options/Extras Groups
+    const [grupos] = await pool.query("SELECT * FROM grupos_opciones WHERE producto_id = ?", [id]);
+    
+    // 3. Get Options Values for each group
+    // Note: In production doing N+1 queries is bad, but fine for detail view of 1 product.
+    const extrasDisponibles = [];
+    
+    for (const grupo of grupos) {
+       const [opciones] = await pool.query("SELECT * FROM opciones_producto WHERE grupo_id = ?", [grupo.id]);
+       
+       // Add to flat list for compatibility with current Frontend (ProductVista) which expects flat extras
+       // OR redesign frontend to handle groups. 
+       // For NOW: Flatten them so they appear as "Extras".
+       for (const op of opciones) {
+          extrasDisponibles.push({
+             id: op.id.toString(), // Frontend expects string id
+             nombre: `${grupo.nombre}: ${op.nombre}`, // Contextualize name "Salsa: BBQ"
+             precio: parseFloat(op.precio_extra),
+             grupo_id: grupo.id,
+             tipo: grupo.tipo_seleccion
+          });
+       }
     }
 
-    res.json({ ...producto, extrasDisponibles: extras });
+    res.json({ ...producto, extrasDisponibles });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

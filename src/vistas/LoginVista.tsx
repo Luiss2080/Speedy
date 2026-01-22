@@ -1,5 +1,6 @@
 import { FontAwesome5 } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -11,18 +12,24 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { LoginEstilos } from "../estilos/LoginEstilos";
 import { loginUsuario } from "../servicios/BaseDeDatos";
+
+export default function LoginVista() {
+  const router = useRouter();
+  const [usuario, setUsuario] = useState("");
+  const [pin, setPin] = useState("");
 
   const handleLogin = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (usuario.length === 0) {
-       alert("Por favor ingresa un usuario");
-       return;
+      alert("Por favor ingresa un usuario");
+      return;
     }
-    
+
     // Call API
     const res = await loginUsuario(usuario, pin || "demo123"); // Default pass if empty for ease of testing
-    
+
     if (res.success) {
       router.replace("/inicio");
     } else {

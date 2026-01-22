@@ -136,8 +136,6 @@ export const crearDireccion = async (
     console.error("API Error (Crear Direccion):", error);
     throw error;
   }
-    throw error;
-  }
 };
 
 export const loginUsuario = async (usuario: string, pin: string) => {

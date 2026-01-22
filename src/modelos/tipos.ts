@@ -56,6 +56,7 @@ export interface Producto {
 
 export interface ItemCarrito {
   id: string;
+  producto_id?: string; // Original database ID
   nombre: string;
   precio: number;
   cantidad: number;

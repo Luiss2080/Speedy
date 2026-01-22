@@ -64,6 +64,7 @@ export const useProductoControlador = () => {
   };
 
   const toggleFavorito = () => {
+    if (!producto) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     toggleFavContext(producto);
   };

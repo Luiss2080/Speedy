@@ -2,12 +2,11 @@ import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { Alert } from "react-native";
 import { useCarrito } from "../context/ContextoCarrito";
+import { crearPedido } from "../servicios/BaseDeDatos";
 
 export const useCarritoControlador = () => {
   const router = useRouter();
   const { items, total, removerItem, limpiarCarrito } = useCarrito();
-
-  import { crearPedido } from "../servicios/BaseDeDatos";
 
   const procederAlPago = () => {
     if (items.length === 0) return;

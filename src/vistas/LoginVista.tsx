@@ -40,7 +40,7 @@ export default function LoginVista() {
       style={LoginEstilos.fondo}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={{ flex: 1, width: "100%" }}
       >
         <ScrollView

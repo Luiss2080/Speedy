@@ -71,13 +71,15 @@ export const LoginEstilos = StyleSheet.create({
     shadowOpacity: 0.03,
     shadowRadius: 5,
     shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
+    // elevation: 1, // Removed to prevent android touch issues
+    zIndex: 10,
   },
   inputIcono: {
     marginRight: 10,
   },
   input: {
     flex: 1,
+    height: "100%", // Ensure full height
     fontSize: 15, // Reduced from 16
     color: "#374151",
   },

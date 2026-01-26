@@ -3,7 +3,10 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   FlatList,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -100,40 +103,48 @@ export default function MisDireccionesVista() {
         animationType="slide"
         presentationStyle="pageSheet"
       >
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Nueva Dirección</Text>
-            <TouchableOpacity onPress={() => setModalVisible(false)}>
-              <FontAwesome5 name="times" size={20} color="#64748B" />
-            </TouchableOpacity>
-          </View>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
+        >
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Nueva Dirección</Text>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <FontAwesome5 name="times" size={20} color="#64748B" />
+              </TouchableOpacity>
+            </View>
 
-          <View style={styles.form}>
-            <TextInput
-              style={styles.input}
-              placeholder="Nombre (ej. Casa, Trabajo)"
-              value={alias}
-              onChangeText={setAlias}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Dirección / Calle y Número"
-              value={direccion}
-              onChangeText={setDireccion}
-            />
-            <TextInput
-              style={[styles.input, { height: 80, textAlignVertical: "top" }]}
-              placeholder="Referencia (opcional)"
-              multiline
-              value={referencia}
-              onChangeText={setReferencia}
-            />
+            <ScrollView
+              contentContainerStyle={styles.form}
+              showsVerticalScrollIndicator={false}
+            >
+              <TextInput
+                style={styles.input}
+                placeholder="Nombre (ej. Casa, Trabajo)"
+                value={alias}
+                onChangeText={setAlias}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Dirección / Calle y Número"
+                value={direccion}
+                onChangeText={setDireccion}
+              />
+              <TextInput
+                style={[styles.input, { height: 80, textAlignVertical: "top" }]}
+                placeholder="Referencia (opcional)"
+                multiline
+                value={referencia}
+                onChangeText={setReferencia}
+              />
 
-            <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-              <Text style={styles.saveText}>Guardar Dirección</Text>
-            </TouchableOpacity>
+              <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
+                <Text style={styles.saveText}>Guardar Dirección</Text>
+              </TouchableOpacity>
+            </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );

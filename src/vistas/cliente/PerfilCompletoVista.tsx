@@ -4,6 +4,8 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Image,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -50,99 +52,114 @@ export default function PerfilCompletoVista() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <FontAwesome5 name="arrow-left" size={20} color="#1E293B" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Mi Perfil</Text>
-        <TouchableOpacity onPress={() => setEditing(!editing)}>
-          <Text style={styles.editText}>{editing ? "Cancelar" : "Editar"}</Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.scroll}>
-        <View style={styles.avatarSection}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <View style={styles.header}>
           <TouchableOpacity
-            onPress={editing ? pickImage : undefined}
-            activeOpacity={editing ? 0.7 : 1}
+            style={styles.backBtn}
+            onPress={() => router.back()}
           >
-            <Image source={{ uri: avatar }} style={styles.avatar} />
-            {editing && (
-              <View style={styles.cameraBadge}>
-                <FontAwesome5 name="camera" size={14} color="#fff" />
-              </View>
-            )}
+            <FontAwesome5 name="arrow-left" size={20} color="#1E293B" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Mi Perfil</Text>
+          <TouchableOpacity onPress={() => setEditing(!editing)}>
+            <Text style={styles.editText}>
+              {editing ? "Cancelar" : "Editar"}
+            </Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.form}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Nombre Completo</Text>
-            <TextInput
-              style={[styles.input, editing && styles.inputEditable]}
-              value={name}
-              onChangeText={setName}
-              editable={editing}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Correo Electrónico</Text>
-            <TextInput
-              style={[styles.input, editing && styles.inputEditable]}
-              value={email}
-              onChangeText={setEmail}
-              editable={editing}
-              keyboardType="email-address"
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Teléfono</Text>
-            <TextInput
-              style={[styles.input, editing && styles.inputEditable]}
-              value="+591 77712345"
-              editable={editing}
-            />
-          </View>
-        </View>
-
-        {editing ? (
-          <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-            <Text style={styles.saveText}>Guardar Cambios</Text>
-          </TouchableOpacity>
-        ) : (
-          <View style={styles.menu}>
+        <ScrollView contentContainerStyle={styles.scroll}>
+          {/* Same content... but avoiding repetition if possible, however I need to wrap the whole scroll */}
+          <View style={styles.avatarSection}>
             <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() =>
-                router.push("/(client-tabs)/perfil/direcciones" as any)
-              }
+              onPress={editing ? pickImage : undefined}
+              activeOpacity={editing ? 0.7 : 1}
             >
-              <View style={styles.iconBox}>
-                <FontAwesome5 name="map-marker-alt" size={18} color="#EA052C" />
-              </View>
-              <Text style={styles.menuText}>Mis Direcciones</Text>
-              <FontAwesome5 name="chevron-right" size={14} color="#CBD5E1" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem}>
-              <View style={styles.iconBox}>
-                <FontAwesome5 name="credit-card" size={18} color="#EA052C" />
-              </View>
-              <Text style={styles.menuText}>Métodos de Pago</Text>
-              <FontAwesome5 name="chevron-right" size={14} color="#CBD5E1" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
-              <View style={styles.iconBox}>
-                <FontAwesome5 name="sign-out-alt" size={18} color="#EF4444" />
-              </View>
-              <Text style={[styles.menuText, { color: "#EF4444" }]}>
-                Cerrar Sesión
-              </Text>
+              <Image source={{ uri: avatar }} style={styles.avatar} />
+              {editing && (
+                <View style={styles.cameraBadge}>
+                  <FontAwesome5 name="camera" size={14} color="#fff" />
+                </View>
+              )}
             </TouchableOpacity>
           </View>
-        )}
-      </ScrollView>
+
+          <View style={styles.form}>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Nombre Completo</Text>
+              <TextInput
+                style={[styles.input, editing && styles.inputEditable]}
+                value={name}
+                onChangeText={setName}
+                editable={editing}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Correo Electrónico</Text>
+              <TextInput
+                style={[styles.input, editing && styles.inputEditable]}
+                value={email}
+                onChangeText={setEmail}
+                editable={editing}
+                keyboardType="email-address"
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Teléfono</Text>
+              <TextInput
+                style={[styles.input, editing && styles.inputEditable]}
+                value="+591 77712345"
+                editable={editing}
+              />
+            </View>
+          </View>
+
+          {editing ? (
+            <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
+              <Text style={styles.saveText}>Guardar Cambios</Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.menu}>
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() =>
+                  router.push("/(client-tabs)/perfil/direcciones" as any)
+                }
+              >
+                <View style={styles.iconBox}>
+                  <FontAwesome5
+                    name="map-marker-alt"
+                    size={18}
+                    color="#EA052C"
+                  />
+                </View>
+                <Text style={styles.menuText}>Mis Direcciones</Text>
+                <FontAwesome5 name="chevron-right" size={14} color="#CBD5E1" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.menuItem}>
+                <View style={styles.iconBox}>
+                  <FontAwesome5 name="credit-card" size={18} color="#EA052C" />
+                </View>
+                <Text style={styles.menuText}>Métodos de Pago</Text>
+                <FontAwesome5 name="chevron-right" size={14} color="#CBD5E1" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+                <View style={styles.iconBox}>
+                  <FontAwesome5 name="sign-out-alt" size={18} color="#EF4444" />
+                </View>
+                <Text style={[styles.menuText, { color: "#EF4444" }]}>
+                  Cerrar Sesión
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

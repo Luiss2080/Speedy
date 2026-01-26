@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#94A3B8",
     marginBottom: 10,
-    uppercase: true,
+    textTransform: "uppercase",
   },
   menuItem: {
     flexDirection: "row",

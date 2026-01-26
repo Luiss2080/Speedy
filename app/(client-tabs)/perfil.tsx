@@ -1,5 +1,5 @@
-import PerfilVista from "../../src/vistas/PerfilVista";
+import PerfilCompletoVista from "../../src/vistas/cliente/PerfilCompletoVista";
 
 export default function ProfileRoute() {
-  return <PerfilVista />;
+  return <PerfilCompletoVista />;
 }

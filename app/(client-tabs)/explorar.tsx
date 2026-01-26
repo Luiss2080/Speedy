@@ -1,5 +1,5 @@
-import ExplorarVista from "../../src/vistas/ExplorarVista";
+import ExplorarCompletoVista from "../../src/vistas/cliente/ExplorarCompletoVista";
 
 export default function ExploreRoute() {
-  return <ExplorarVista />;
+  return <ExplorarCompletoVista />;
 }

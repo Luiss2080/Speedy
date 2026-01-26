@@ -47,9 +47,9 @@ export default function LoginVista() {
     if (res.success) {
       login(res.user, res.repartidor);
       if (res.user.rol === "repartidor") {
-        router.replace("/(driver-tabs)/");
+        router.replace("/(driver-tabs)/" as any);
       } else {
-        router.replace("/(client-tabs)/");
+        router.replace("/(client-tabs)/" as any);
       }
     } else {
       if (Platform.OS !== "web") {

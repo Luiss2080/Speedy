@@ -158,10 +158,10 @@ app.post("/api/login", async (req, res) => {
     // Assuming 'usuario' from frontend maps to 'nombre' or 'email' in DB. Let's use 'nombre' for simplicity as per current frontend usage.
     const { usuario } = req.body;
 
-    // Search by name (since frontend sends 'usuario') or email if you prefer standardizing later
+    // Search by name OR email
     const [rows] = await pool.query(
-      "SELECT * FROM usuarios WHERE nombre = ? AND password = ?",
-      [usuario, password],
+      "SELECT * FROM usuarios WHERE (nombre = ? OR email = ?) AND password = ?",
+      [usuario, usuario, password],
     );
 
     if (rows.length > 0) {

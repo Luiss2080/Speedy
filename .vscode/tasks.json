@@ -12,27 +12,49 @@
       }
     },
     {
-      "label": "🔧 Fix: Emulator Cold Boot",
+      "label": "1. Start Backend",
       "type": "shell",
-      "command": "& 'C:\\Users\\LuissxD\\AppData\\Local\\Android\\Sdk\\emulator\\emulator.exe' -avd Pixel_7_Pro -no-snapshot-load",
+      "command": "npm start",
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
       "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^.*Running on.*$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": ".*Conectado a la base de datos.*"
+        }
+      },
       "presentation": {
-        "reveal": "always"
+        "group": "speedy",
+        "reveal": "always",
+        "panel": "split"
       }
     },
     {
-      "label": "🚀 Start Speedy App (Full Stack)",
+      "label": "2. Start Frontend (Dynamic IP)",
       "type": "shell",
       "command": "node start_app.js",
       "isBackground": true,
       "problemMatcher": [],
+      "presentation": {
+        "group": "speedy",
+        "reveal": "always",
+        "panel": "split"
+      }
+    },
+    {
+      "label": "🚀 Run Speedy App (Full Stack)",
+      "dependsOn": ["1. Start Backend", "2. Start Frontend (Dynamic IP)"],
+      "dependsOrder": "parallel",
+      "problemMatcher": [],
       "group": {
         "kind": "build",
         "isDefault": true
-      },
-      "presentation": {
-        "reveal": "always",
-        "panel": "new"
       }
     }
   ]

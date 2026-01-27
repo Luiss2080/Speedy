@@ -32,7 +32,7 @@
       "presentation": {
         "group": "speedy",
         "reveal": "always",
-        "panel": "split"
+        "panel": "dedicated"
       }
     },
     {
@@ -44,7 +44,7 @@
       "presentation": {
         "group": "speedy",
         "reveal": "always",
-        "panel": "split"
+        "panel": "dedicated"
       }
     },
     {

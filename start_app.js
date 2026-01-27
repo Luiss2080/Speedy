@@ -1,8 +1,7 @@
 const { spawn } = require("child_process");
 const os = require("os");
-const path = require("path");
 
-// 1. Get Local IP (IPv4, not internal, prefers Wi-Fi/Ethernet)
+// 1. Get Local IP
 function getLocalIP() {
   const interfaces = os.networkInterfaces();
   let preferredIP = "";
@@ -32,22 +31,19 @@ console.log(
   `\x1b[32m[Expo Helper]\x1b[0m Launching Expo in current terminal...`,
 );
 
-// 2. Start Expo in current process with inherited STDIO (preserves QR code colors and interactivity)
+// 2. Start Expo
 const env = {
   ...process.env,
   REACT_NATIVE_PACKAGER_HOSTNAME: localIP,
   EXPO_DEVTOOLS_LISTEN_ADDRESS: localIP,
 };
 
-// Spawn 'npm start'
-const expoProcess = spawn(
-  /^win/.test(process.platform) ? "npm.cmd" : "npm",
-  ["start"],
-  {
-    stdio: "inherit",
-    env: env,
-  },
-);
+// Use shell: true to handle npm/npm.cmd automatically on Windows
+const expoProcess = spawn("npm", ["start"], {
+  stdio: "inherit",
+  shell: true,
+  env: env,
+});
 
 expoProcess.on("close", (code) => {
   console.log(`Expo process exited with code ${code}`);

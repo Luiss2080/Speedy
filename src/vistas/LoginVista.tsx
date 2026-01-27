@@ -69,7 +69,7 @@ export default function LoginVista() {
       if (res.user.rol === "repartidor") {
         router.replace("/(driver-tabs)/" as any);
       } else {
-        router.replace("/(client-tabs)/" as any);
+        router.replace("/(client-tabs)/inicio" as any);
       }
     } else {
       if (Platform.OS !== "web") {

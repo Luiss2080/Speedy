@@ -200,6 +200,114 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+// 6. Pedidos (API NUEVA)
+app.post("/api/pedidos", async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const { usuario_id, total, items, restaurante_id, direccion_entrega_id } =
+      req.body;
+
+    // Defaults for missing data (since frontend might not send everything yet)
+    const finalUserId = usuario_id || 1;
+    const finalRestauranteId = restaurante_id || 1; // Default to first restaurant if not sent
+    const finalDireccionId = direccion_entrega_id || 1; // Default to first address
+
+    // Generate simple tracking code
+    const codigo = `ORD-${Date.now().toString().slice(-6)}`;
+
+    // 1. Insert Header
+    const [pedidoResult] = await connection.query(
+      `INSERT INTO pedidos (
+        codigo_seguimiento, usuario_id, restaurante_id, direccion_entrega_id, 
+        subtotal, costo_envio, total_final, estado
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        codigo,
+        finalUserId,
+        finalRestauranteId,
+        finalDireccionId,
+        total - 2.0, // Assuming 2.00 shipping cost based on frontend
+        2.0,
+        total,
+        "pendiente",
+      ],
+    );
+
+    const pedidoId = pedidoResult.insertId;
+
+    // 2. Insert Details
+    if (items && items.length > 0) {
+      for (const item of items) {
+        await connection.query(
+          `INSERT INTO detalle_pedido (pedido_id, producto_id, cantidad, precio_unitario, nombre_producto_snapshot) 
+            VALUES (?, ?, ?, ?, ?)`,
+          [
+            pedidoId,
+            item.producto_id || 1,
+            item.cantidad,
+            item.precio,
+            "Producto Generico",
+          ],
+          // Note: In a real app we would fetch product name from DB to enable snapshot
+        );
+      }
+    }
+
+    await connection.commit();
+    res.json({
+      success: true,
+      message: "Pedido creado correctamente",
+      id: pedidoId,
+      codigo,
+    });
+  } catch (err) {
+    await connection.rollback();
+    console.error("Error creando pedido:", err);
+    res
+      .status(500)
+      .json({ success: false, message: "Error al procesar el pedido" });
+  } finally {
+    connection.release();
+  }
+});
+
+app.get("/api/pedidos", async (req, res) => {
+  try {
+    const { usuario_id, repartidor_id, estado } = req.query;
+    let query = `
+      SELECT p.*, r.nombre as restaurante_nombre, r.imagen_logo as restaurante_logo
+      FROM pedidos p
+      JOIN restaurantes r ON p.restaurante_id = r.id
+    `;
+    const params = [];
+
+    if (usuario_id) {
+      query += " WHERE p.usuario_id = ?";
+      params.push(usuario_id);
+    } else if (repartidor_id) {
+      query += " WHERE p.repartidor_id = ?";
+      params.push(repartidor_id);
+      if (estado) {
+        query += " AND p.estado = ?";
+        params.push(estado);
+      }
+    }
+
+    query += " ORDER BY p.fecha_creacion DESC";
+
+    const [rows] = await pool.query(query, params);
+
+    // Transform to match frontend expectations if needed
+    // Current frontend expects simple list, this seems compatible.
+    res.json(rows);
+  } catch (err) {
+    console.error("Error fetching pedidos:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Start Server
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Servidor backend corriendo en http://localhost:${PORT}`);

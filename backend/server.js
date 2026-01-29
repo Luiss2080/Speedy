@@ -200,6 +200,38 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+// 5.8. Validar Cupon
+app.post("/api/cupones/validar", async (req, res) => {
+  try {
+    const { codigo } = req.body;
+    // Simple mock validation for now or check DB if populated
+    // Let's support a few hardcoded ones for demo excellence
+    const cupones = {
+      WELCOME20: {
+        descuento: 20,
+        tipo: "porcentaje",
+        descripcion: "20% Descuento Bienvenida",
+      },
+      ENVIOFREE: {
+        descuento: 100,
+        tipo: "envio_gratis",
+        descripcion: "Envío Gratis",
+      },
+      SPEEDY5: { descuento: 5, tipo: "monto_fijo", descripcion: "$5.00 OFF" },
+    };
+
+    if (cupones[codigo]) {
+      res.json({ success: true, ...cupones[codigo] });
+    } else {
+      res
+        .status(404)
+        .json({ success: false, message: "Cupón no válido o expirado" });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // 6. Pedidos (API NUEVA)
 app.post("/api/pedidos", async (req, res) => {
   const connection = await pool.getConnection();

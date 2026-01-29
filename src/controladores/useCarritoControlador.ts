@@ -20,8 +20,13 @@ export const useCarritoControlador = () => {
     tipoServicio,
     setTipoServicio,
     costoEnvio,
-    cotizarEnvio, // Added: cotizarEnvio
-  } = useContext(ContextoCarrito)!; // Modified: Changed useCarrito() to useContext(ContextoCarrito)!;
+    cotizarEnvio,
+    cupon,
+    aplicarCupon,
+    removerCupon,
+    descuento,
+    subTotal,
+  } = useContext(ContextoCarrito)!;
 
   useEffect(() => {
     if (items.length > 0 && direccionEntrega) {
@@ -154,6 +159,10 @@ export const useCarritoControlador = () => {
     setDireccionEntrega,
     tipoServicio,
     setTipoServicio,
-    // Helper for finding delivery address in next screens if needed
+    cupon,
+    aplicarCupon,
+    removerCupon,
+    descuento,
+    subTotal,
   };
 };

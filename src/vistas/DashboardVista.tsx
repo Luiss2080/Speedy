@@ -7,7 +7,6 @@ import {
   ScrollView,
   StatusBar,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -89,15 +88,17 @@ export default function DashboardVista() {
             </View>
           </View>
 
-          {/* Search Bar */}
-          <View style={DashboardEstilos.contenedorBusqueda}>
+          {/* Search Bar - Navigate to Explore */}
+          <TouchableOpacity
+            style={DashboardEstilos.contenedorBusqueda}
+            onPress={() => router.push("/explorar" as any)}
+            activeOpacity={0.9}
+          >
             <FontAwesome5 name="search" size={16} color="#9ca3af" />
-            <TextInput
-              placeholder="Buscar comida, restaurantes..."
-              style={DashboardEstilos.inputBusqueda}
-              placeholderTextColor="#9ca3af"
-            />
-          </View>
+            <Text style={{ color: "#9ca3af", marginLeft: 10 }}>
+              Buscar comida, restaurantes...
+            </Text>
+          </TouchableOpacity>
 
           {/* Stats Cards Row */}
           <View style={DashboardEstilos.contenedorEstadisticas}>

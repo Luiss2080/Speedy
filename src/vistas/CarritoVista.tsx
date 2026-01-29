@@ -28,8 +28,13 @@ export default function CarritoVista() {
     setNotas,
     direccionEntrega,
     tipoServicio,
+    tipoServicio,
     setTipoServicio,
     router,
+    cupon,
+    aplicarCupon,
+    removerCupon,
+    descuento,
   } = useCarritoControlador();
 
   // ... (keeping return content mostly same until summary)

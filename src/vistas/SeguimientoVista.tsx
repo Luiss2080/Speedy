@@ -1,62 +1,130 @@
-import { FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
-import * as Location from "expo-location";
-import { useLocalSearchParams } from "expo-router";
+import { FontAwesome5 } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Linking, Text, TouchableOpacity, View } from "react-native";
-import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from "react-native-maps";
+import {
+  Alert,
+  Linking,
+  Modal,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import { SeguimientoEstilos } from "../estilos/SeguimientoEstilos";
+import { API_URL } from "../servicios/BaseDeDatos"; // Assuming this is where API_URL is, or finding equivalent
+
+// Simple interpolation function for smooth movement
+const interpolate = (start: number, end: number, factor: number) => {
+  return start + (end - start) * factor;
+};
 
 export default function SeguimientoVista() {
   const { id } = useLocalSearchParams();
+  const router = useRouter();
   const mapRef = useRef<MapView>(null);
-  const [status, setStatus] = useState("En cocina");
-  const [progress, setProgress] = useState(0.2);
-  const [eta, setEta] = useState("25 min");
 
-  // Mock Route Coordinates (simulating a path)
-  const [routeCoords] = useState([
-    { latitude: -12.125, longitude: -77.025 }, // Origin (Driver)
-    { latitude: -12.124, longitude: -77.027 },
-    { latitude: -12.123, longitude: -77.029 },
-    { latitude: -12.122146, longitude: -77.030995 }, // Destination (User)
-  ]);
+  const [pedido, setPedido] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [driverLoc, setDriverLoc] = useState<any>(null);
+  const [userLoc, setUserLoc] = useState<any>(null);
+  const [detalleVisible, setDetalleVisible] = useState(false);
+
+  // Simulation state
+  const [progress, setProgress] = useState(0);
+  const [eta, setEta] = useState("");
+  const [status, setStatus] = useState("Asignando conductor...");
 
   useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        // Just log or silently fail in mock, but alert is good practice
-        // Alert.alert('Permiso denegado', 'No podemos mostrar tu ubicación exacta sin permisos.');
+    cargarPedido();
+  }, [id]);
+
+  const cargarPedido = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/pedidos/${id}`);
+      const data = await res.json();
+
+      if (data.error) {
+        Alert.alert("Error", "No se encontró el pedido");
+        router.back();
         return;
       }
-    })();
 
-    // Simulate order progress
-    const timer1 = setTimeout(() => {
-      setStatus("Recogido");
-      setProgress(0.5);
-      setEta("15 min");
-    }, 3000);
+      setPedido(data);
 
-    const timer2 = setTimeout(() => {
-      setStatus("En camino");
-      setProgress(0.8);
-      setEta("5 min");
-    }, 8000);
+      // Setup locations
+      // 1. Driver Start (Restaurant or Driver Actual)
+      const startLat = data.repartidor_lat || data.restaurante_lat || -12.125;
+      const startLon = data.repartidor_lon || data.restaurante_lon || -77.025;
 
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    };
-  }, []);
+      // 2. User End (Mock if no geocoding)
+      // For demo, we place user slightly away from driver
+      const endLat = startLat + 0.01; // Approx 1km
+      const endLon = startLon + 0.01;
+
+      const start = { latitude: startLat, longitude: startLon };
+      const end = { latitude: endLat, longitude: endLon };
+
+      setDriverLoc(start);
+      setUserLoc(end);
+
+      setStatus(
+        data.estado === "pendiente"
+          ? "Preparando tu pedido"
+          : "Pedido en camino",
+      );
+      setLoading(false);
+
+      // Start Simulation
+      startSimulation(start, end);
+    } catch (e) {
+      console.error(e);
+      Alert.alert("Error", "Error de conexión");
+    }
+  };
+
+  const startSimulation = (start: any, end: any) => {
+    let t = 0;
+    const duration = 30000; // 30 seconds to arrive
+    const interval = 100; // update every 100ms
+    const step = interval / duration;
+
+    const timer = setInterval(() => {
+      t += step;
+      if (t >= 1) {
+        t = 1;
+        clearInterval(timer);
+        setStatus("¡Tu pedido ha llegado!");
+        setEta("0 min");
+      } else {
+        // Update ETA
+        const remainingSecs = Math.ceil((1 - t) * (duration / 1000));
+        setEta(`${Math.ceil(remainingSecs / 60)} min`);
+        if (t < 0.2) setStatus("Conductor en camino al restaurante");
+        else if (t < 0.4) setStatus("Recogiendo pedido");
+        else setStatus("En camino a tu ubicación");
+      }
+
+      const newLat = interpolate(start.latitude, end.latitude, t);
+      const newLon = interpolate(start.longitude, end.longitude, t);
+
+      setDriverLoc({ latitude: newLat, longitude: newLon });
+      setProgress(t);
+    }, interval);
+  };
 
   const handleCall = () => {
-    Linking.openURL("tel:+51999999999");
+    if (pedido?.repartidor_telefono)
+      Linking.openURL(`tel:${pedido.repartidor_telefono}`);
+    else Alert.alert("Info", "Conductor no tiene teléfono registrado");
   };
 
-  const handleMessage = () => {
-    Linking.openURL("sms:+51999999999");
-  };
+  if (loading)
+    return (
+      <View style={SeguimientoEstilos.contenedor}>
+        <Text>Cargando...</Text>
+      </View>
+    );
 
   return (
     <View style={SeguimientoEstilos.contenedor}>
@@ -64,24 +132,17 @@ export default function SeguimientoVista() {
         ref={mapRef}
         style={SeguimientoEstilos.mapaPlaceholder}
         provider={PROVIDER_DEFAULT}
-        initialRegion={{
-          latitude: -12.1235,
-          longitude: -77.028,
+        region={{
+          latitude: driverLoc.latitude,
+          longitude: driverLoc.longitude,
           latitudeDelta: 0.015,
           longitudeDelta: 0.015,
         }}
       >
-        <Polyline
-          coordinates={routeCoords}
-          strokeColor="#C21833"
-          strokeWidth={4}
-          lineDashPattern={[1]}
-        />
-
         <Marker
-          coordinate={routeCoords[3]}
-          title="Tu ubicación"
-          description="Av. Larco 123"
+          coordinate={userLoc}
+          title="Tú"
+          description={pedido.direccion_entrega_texto}
         >
           <View
             style={{
@@ -96,11 +157,7 @@ export default function SeguimientoVista() {
           </View>
         </Marker>
 
-        <Marker
-          coordinate={routeCoords[0]}
-          title="Repartidor"
-          description={status}
-        >
+        <Marker coordinate={driverLoc} title="Repartidor">
           <View
             style={{
               backgroundColor: "#fff",
@@ -115,40 +172,24 @@ export default function SeguimientoVista() {
         </Marker>
       </MapView>
 
+      {/* Driver & Status Panel */}
       <View style={SeguimientoEstilos.panelEstado}>
-        <View style={{ alignItems: "center", marginBottom: 10 }}>
-          <View
-            style={{
-              width: 40,
-              height: 4,
-              backgroundColor: "#e2e8f0",
-              borderRadius: 2,
-            }}
-          />
-        </View>
-
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 10,
-          }}
+        <TouchableOpacity
+          style={{ alignItems: "center", marginBottom: 10 }}
+          onPress={() => setDetalleVisible(true)}
         >
-          <View>
-            <Text style={SeguimientoEstilos.estadoTitulo}>{status}</Text>
-            <Text style={SeguimientoEstilos.estadoSubtitulo}>
-              Llegada estimada:{" "}
-              <Text style={{ color: "#C21833", fontWeight: "bold" }}>
-                {eta}
-              </Text>
-            </Text>
-          </View>
-          <MaterialCommunityIcons
-            name="timer-outline"
-            size={28}
-            color="#C21833"
-          />
+          <Text style={{ color: "#64748b", fontSize: 12 }}>
+            Ver detalles del pedido
+          </Text>
+          <FontAwesome5 name="chevron-up" size={12} color="#64748b" />
+        </TouchableOpacity>
+
+        <View style={{ marginBottom: 10 }}>
+          <Text style={SeguimientoEstilos.estadoTitulo}>{status}</Text>
+          <Text style={SeguimientoEstilos.estadoSubtitulo}>
+            Llegada estimada:{" "}
+            <Text style={{ color: "#C21833", fontWeight: "bold" }}>{eta}</Text>
+          </Text>
         </View>
 
         <View style={SeguimientoEstilos.barraProgreso}>
@@ -174,32 +215,14 @@ export default function SeguimientoVista() {
             <FontAwesome5 name="user-alt" size={20} color="#64748b" />
           </View>
           <View style={{ flex: 1, marginLeft: 10 }}>
-            <Text style={SeguimientoEstilos.repartidorNombre}>Juan Pérez</Text>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginTop: 2,
-              }}
-            >
-              <FontAwesome5 name="star" size={10} color="#eab308" solid />
-              <Text style={{ fontSize: 12, color: "#64748b", marginLeft: 4 }}>
-                4.9 (150 envíos)
-              </Text>
-            </View>
+            <Text style={SeguimientoEstilos.repartidorNombre}>
+              {pedido.repartidor_nombre || "Buscando conductor..."}
+            </Text>
+            <Text style={{ fontSize: 12, color: "#64748b" }}>
+              {pedido.repartidor_vehiculo || "Moto"}
+            </Text>
           </View>
-
           <View style={{ flexDirection: "row", gap: 10 }}>
-            <TouchableOpacity
-              onPress={handleMessage}
-              style={{
-                backgroundColor: "#eff6ff",
-                padding: 10,
-                borderRadius: 50,
-              }}
-            >
-              <FontAwesome5 name="comment-dots" size={20} color="#3b82f6" />
-            </TouchableOpacity>
             <TouchableOpacity
               onPress={handleCall}
               style={{
@@ -213,6 +236,82 @@ export default function SeguimientoVista() {
           </View>
         </View>
       </View>
+
+      {/* Order Detail Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={detalleVisible}
+        onRequestClose={() => setDetalleVisible(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "flex-end",
+            backgroundColor: "rgba(0,0,0,0.5)",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "#fff",
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              padding: 20,
+              maxHeight: "60%",
+            }}
+          >
+            <Text
+              style={{ fontSize: 20, fontWeight: "bold", marginBottom: 15 }}
+            >
+              Detalle del Pedido
+            </Text>
+            <ScrollView>
+              {pedido.items?.map((item: any, index: number) => (
+                <View
+                  key={index}
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    marginBottom: 10,
+                    borderBottomWidth: 1,
+                    borderBottomColor: "#f1f5f9",
+                    paddingBottom: 5,
+                  }}
+                >
+                  <Text style={{ fontWeight: "600" }}>
+                    {item.cantidad}x Prod
+                  </Text>
+                  <Text>${parseFloat(item.precio_unitario).toFixed(2)}</Text>
+                </View>
+              ))}
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginTop: 10,
+                }}
+              >
+                <Text style={{ fontWeight: "bold" }}>Total</Text>
+                <Text style={{ fontWeight: "bold", color: "#C21833" }}>
+                  ${parseFloat(pedido.total_final).toFixed(2)}
+                </Text>
+              </View>
+            </ScrollView>
+            <TouchableOpacity
+              style={{
+                backgroundColor: "#C21833",
+                padding: 15,
+                borderRadius: 10,
+                alignItems: "center",
+                marginTop: 20,
+              }}
+              onPress={() => setDetalleVisible(false)}
+            >
+              <Text style={{ color: "#fff", fontWeight: "bold" }}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

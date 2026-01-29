@@ -217,17 +217,36 @@ app.post("/api/pedidos", async (req, res) => {
     // Generate simple tracking code
     const codigo = `ORD-${Date.now().toString().slice(-6)}`;
 
+    // 1. Assign Driver (Simple round-robin or first available)
+    const [conductores] = await connection.query(
+      "SELECT id FROM repartidores WHERE estado = 'disponible' LIMIT 1",
+    );
+
+    let conductorId = null;
+    if (conductores.length > 0) {
+      conductorId = conductores[0].id;
+      // Optionally update driver status to 'ocupado'
+      // await connection.query("UPDATE repartidores SET estado = 'ocupado' WHERE id = ?", [conductorId]);
+    } else {
+      // Fallback: Assign to ID 1 if exists, just for demo continuity
+      const [conductoresBackup] = await connection.query(
+        "SELECT id FROM repartidores LIMIT 1",
+      );
+      if (conductoresBackup.length > 0) conductorId = conductoresBackup[0].id;
+    }
+
     // 1. Insert Header
     const [pedidoResult] = await connection.query(
       `INSERT INTO pedidos (
-        codigo_seguimiento, usuario_id, restaurante_id, direccion_entrega_id, 
+        codigo_seguimiento, usuario_id, restaurante_id, direccion_entrega_id, conductor_id,
         subtotal, costo_envio, total_final, estado, metodo_pago, notas, direccion_origen, tipo_servicio
-       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         codigo,
         finalUserId,
         finalRestauranteId,
         finalDireccionId,
+        conductorId,
         total - 2.0, // Assuming 2.00 shipping cost based on frontend
         2.0,
         total,
@@ -308,6 +327,48 @@ app.get("/api/pedidos", async (req, res) => {
     res.json(rows);
   } catch (err) {
     console.error("Error fetching pedidos:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 7. Get Pedido by ID (with driver info)
+app.get("/api/pedidos/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await pool.query(
+      `
+      SELECT p.*, 
+             r.nombre as restaurante_nombre, 
+             r.direccion as restaurante_direccion,
+             r.latitud as restaurante_lat,
+             r.longitud as restaurante_lon,
+             rep.nombre as repartidor_nombre,
+             rep.telefono as repartidor_telefono,
+             rep.modelo_vehiculo as repartidor_vehiculo,
+             rep.latitud_actual as repartidor_lat,
+             rep.longitud_actual as repartidor_lon,
+             d.titulo as direccion_entrega_titulo,
+             d.direccion as direccion_entrega_texto
+      FROM pedidos p
+      LEFT JOIN restaurantes r ON p.restaurante_id = r.id
+      LEFT JOIN repartidores rep ON p.conductor_id = rep.id
+      LEFT JOIN direcciones d ON p.direccion_entrega_id = d.id
+      WHERE p.id = ?
+    `,
+      [id],
+    );
+
+    if (rows.length === 0)
+      return res.status(404).json({ error: "Pedido no encontrado" });
+
+    // Get details
+    const [detalles] = await pool.query(
+      "SELECT * FROM detalle_pedido WHERE pedido_id = ?",
+      [id],
+    );
+
+    res.json({ ...rows[0], items: detalles });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });

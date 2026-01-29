@@ -12,17 +12,9 @@ const getApiUrl = () => {
   // 2. Autodetección via Expo (Metro Bundler)
   // Constants.expoConfig.hostUri viene de REACT_NATIVE_PACKAGER_HOSTNAME
   const debuggerHost = Constants.expoConfig?.hostUri;
-  const localhost = debuggerHost?.split(":")[0];
-
-  if (localhost) {
-    return `http://${localhost}:3000/api`;
-  }
-
-  // 3. Fallback (Solo si todo falla)
-  return "http://192.168.1.15:3000/api";
-};
-
-const API_URL = getApiUrl();
+// Update this IP with your computer's local IP (e.g., from ipconfig)
+// Example: http://192.168.1.15:3000
+export const API_URL = "http://192.168.1.5:3000/api"; // Reemplaza con tu IP real
 console.log(`📡 Conectando a API Backend en: ${API_URL}`);
 
 // Helper to prevent infinite hangs

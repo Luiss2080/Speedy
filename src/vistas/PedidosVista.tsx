@@ -1,36 +1,64 @@
-import { useRouter } from "expo-router";
-import { FlatList, Text, TouchableOpacity, View } from "react-native";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { PedidosEstilos } from "../estilos/PedidosEstilos";
-
-const pedidosMock = [
-  {
-    id: "1",
-    restaurante: "Burger King",
-    fecha: "20 Ene, 14:30",
-    estado: "Entregado",
-    total: "$15.50",
-    colorEstado: "#10b981",
-  },
-  {
-    id: "2",
-    restaurante: "Pizza Hut",
-    fecha: "18 Ene, 20:00",
-    estado: "Entregado",
-    total: "$22.00",
-    colorEstado: "#10b981",
-  },
-  {
-    id: "3",
-    restaurante: "McDonalds",
-    fecha: "15 Ene, 13:00",
-    estado: "Cancelado",
-    total: "$10.00",
-    colorEstado: "#ef4444",
-  },
-];
+import { API_URL } from "../servicios/BaseDeDatos";
 
 export default function PedidosVista() {
   const router = useRouter();
+  const [pedidos, setPedidos] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const cargarPedidos = async () => {
+    try {
+      setLoading(true);
+      // In real app, filter by logged in user ID, e.g. ?usuario_id=1
+      const res = await fetch(`${API_URL}/api/pedidos?usuario_id=1`);
+      const data = await res.json();
+      setPedidos(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      cargarPedidos();
+    }, []),
+  );
+
+  const getEstadoColor = (estado: string) => {
+    switch (estado.toLowerCase()) {
+      case "entregado":
+        return "#10b981";
+      case "pendiente":
+        return "#eab308";
+      case "en camino":
+        return "#3b82f6";
+      case "cancelado":
+        return "#ef4444";
+      default:
+        return "#64748b";
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("es-ES", {
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   return (
     <View style={PedidosEstilos.contenedor}>
@@ -38,32 +66,65 @@ export default function PedidosVista() {
         <Text style={PedidosEstilos.titulo}>Mis Pedidos</Text>
       </View>
 
-      <FlatList
-        data={pedidosMock}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={PedidosEstilos.lista}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[
-              PedidosEstilos.tarjeta,
-              { borderLeftColor: item.colorEstado },
-            ]}
-            onPress={() => router.push(`/seguimiento/${item.id}`)}
-          >
-            <View style={PedidosEstilos.filaEncabezado}>
-              <Text style={PedidosEstilos.nombreRestaurante}>
-                {item.restaurante}
-              </Text>
-              <Text style={PedidosEstilos.fecha}>{item.fecha}</Text>
-            </View>
-            <Text style={[PedidosEstilos.estado, { color: item.colorEstado }]}>
-              {item.estado}
+      {loading ? (
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <ActivityIndicator size="large" color="#C21833" />
+        </View>
+      ) : (
+        <FlatList
+          data={pedidos}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={PedidosEstilos.lista}
+          ListEmptyComponent={
+            <Text style={{ textAlign: "center", marginTop: 20, color: "#666" }}>
+              No tienes pedidos aún.
             </Text>
-            <Text style={PedidosEstilos.detalles}>Ver detalles</Text>
-            <Text style={PedidosEstilos.total}>{item.total}</Text>
-          </TouchableOpacity>
-        )}
-      />
+          }
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={[
+                PedidosEstilos.tarjeta,
+                { borderLeftColor: getEstadoColor(item.estado) },
+              ]}
+              onPress={() => router.push(`/seguimiento/${item.id}`)}
+            >
+              <View style={PedidosEstilos.filaEncabezado}>
+                <Text style={PedidosEstilos.nombreRestaurante}>
+                  {item.restaurante_nombre || "Restaurante"}
+                </Text>
+                <Text style={PedidosEstilos.fecha}>
+                  {formatDate(item.fecha_creacion)}
+                </Text>
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginTop: 5,
+                }}
+              >
+                <Text
+                  style={[
+                    PedidosEstilos.estado,
+                    { color: getEstadoColor(item.estado) },
+                  ]}
+                >
+                  {item.estado.toUpperCase()}
+                </Text>
+                <Text style={{ fontWeight: "bold", color: "#C21833" }}>
+                  {item.tipo_servicio === "retiro" ? "RETIRO" : "DELIVERY"}
+                </Text>
+              </View>
+              <Text style={PedidosEstilos.detalles}>Ver seguimiento</Text>
+              <Text style={PedidosEstilos.total}>
+                ${parseFloat(item.total_final).toFixed(2)}
+              </Text>
+            </TouchableOpacity>
+          )}
+        />
+      )}
     </View>
   );
 }

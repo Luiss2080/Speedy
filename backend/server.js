@@ -217,22 +217,25 @@ app.post("/api/pedidos", async (req, res) => {
     // Generate simple tracking code
     const codigo = `ORD-${Date.now().toString().slice(-6)}`;
 
-    // 1. Assign Driver (Simple round-robin or first available)
-    const [conductores] = await connection.query(
-      "SELECT id FROM repartidores WHERE estado = 'disponible' LIMIT 1",
-    );
-
+    // 1. Assign Driver (Only if Delivery)
+    const tipoServicio =
+      req.body.tipoServicio || req.body.tipo_servicio || "delivery";
     let conductorId = null;
-    if (conductores.length > 0) {
-      conductorId = conductores[0].id;
-      // Optionally update driver status to 'ocupado'
-      // await connection.query("UPDATE repartidores SET estado = 'ocupado' WHERE id = ?", [conductorId]);
-    } else {
-      // Fallback: Assign to ID 1 if exists, just for demo continuity
-      const [conductoresBackup] = await connection.query(
-        "SELECT id FROM repartidores LIMIT 1",
+
+    if (tipoServicio === "delivery") {
+      const [conductores] = await connection.query(
+        "SELECT id FROM repartidores WHERE estado = 'disponible' LIMIT 1",
       );
-      if (conductoresBackup.length > 0) conductorId = conductoresBackup[0].id;
+
+      if (conductores.length > 0) {
+        conductorId = conductores[0].id;
+      } else {
+        // Fallback: Assign to ID 1 if exists
+        const [conductoresBackup] = await connection.query(
+          "SELECT id FROM repartidores LIMIT 1",
+        );
+        if (conductoresBackup.length > 0) conductorId = conductoresBackup[0].id;
+      }
     }
 
     // 1. Insert Header

@@ -53,6 +53,31 @@ export const CarritoEstilos = StyleSheet.create({
     marginTop: 20,
   },
   textoBoton: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+  botonToggle: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    marginHorizontal: 2,
+    borderRadius: 8,
+    gap: 8,
+  },
+  botonToggleActivo: {
+    backgroundColor: "#fff1f2",
+    borderColor: "#e11d48",
+  },
+  textoToggle: {
+    fontSize: 14,
+    color: "#64748b",
+    fontWeight: "600",
+  },
+  textoToggleActivo: {
+    color: "#e11d48",
+  },
   tituloSeccion: {
     fontSize: 18,
     fontWeight: "bold",

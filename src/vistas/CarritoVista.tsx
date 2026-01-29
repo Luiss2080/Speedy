@@ -27,6 +27,9 @@ export default function CarritoVista() {
     notas,
     setNotas,
     direccionEntrega,
+    tipoServicio,
+    setTipoServicio,
+    router,
   } = useCarritoControlador();
 
   // ... (keeping return content mostly same until summary)
@@ -162,10 +165,61 @@ export default function CarritoVista() {
 
         {items.length > 0 && (
           <View style={CarritoEstilos.resumen}>
+            {/* Service Type Toggle */}
+            <View style={{ flexDirection: "row", marginBottom: 20 }}>
+              <TouchableOpacity
+                style={[
+                  CarritoEstilos.botonToggle,
+                  tipoServicio === "delivery" &&
+                    CarritoEstilos.botonToggleActivo,
+                ]}
+                onPress={() => setTipoServicio("delivery")}
+              >
+                <MaterialCommunityIcons
+                  name="moped"
+                  size={20}
+                  color={tipoServicio === "delivery" ? "#e11d48" : "#64748b"}
+                />
+                <Text
+                  style={[
+                    CarritoEstilos.textoToggle,
+                    tipoServicio === "delivery" &&
+                      CarritoEstilos.textoToggleActivo,
+                  ]}
+                >
+                  Delivery
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  CarritoEstilos.botonToggle,
+                  tipoServicio === "retiro" && CarritoEstilos.botonToggleActivo,
+                ]}
+                onPress={() => setTipoServicio("retiro")}
+              >
+                <MaterialCommunityIcons
+                  name="store"
+                  size={20}
+                  color={tipoServicio === "retiro" ? "#e11d48" : "#64748b"}
+                />
+                <Text
+                  style={[
+                    CarritoEstilos.textoToggle,
+                    tipoServicio === "retiro" &&
+                      CarritoEstilos.textoToggleActivo,
+                  ]}
+                >
+                  Retiro
+                </Text>
+              </TouchableOpacity>
+            </View>
+
             {/* Delivery Details Section */}
             <View style={{ marginBottom: 20 }}>
               <Text style={CarritoEstilos.tituloSeccion}>
-                Detalles de Entrega
+                {tipoServicio === "delivery"
+                  ? "Detalles de Entrega"
+                  : "Detalles de Retiro"}
               </Text>
 
               {/* Origin */}
@@ -179,22 +233,46 @@ export default function CarritoVista() {
                 </View>
               </View>
 
-              {/* Destination */}
-              <View style={CarritoEstilos.filaDetalle}>
-                <FontAwesome5 name="map-marker-alt" size={16} color="#64748b" />
-                <View style={{ flex: 1, marginLeft: 10 }}>
-                  <Text style={CarritoEstilos.textoEtiqueta}>Destino</Text>
-                  <Text style={CarritoEstilos.textoValor}>
-                    {direccionEntrega
-                      ? direccionEntrega.titulo
-                      : "Casa (Predeterminado)"}
-                  </Text>
+              {/* Destination/Pickup Point */}
+              {tipoServicio === "delivery" ? (
+                <TouchableOpacity
+                  style={CarritoEstilos.filaDetalle}
+                  onPress={() =>
+                    router.push("/direcciones?modo=seleccion" as any)
+                  }
+                >
+                  <FontAwesome5
+                    name="map-marker-alt"
+                    size={16}
+                    color="#e11d48"
+                  />
+                  <View style={{ flex: 1, marginLeft: 10 }}>
+                    <Text style={CarritoEstilos.textoEtiqueta}>Destino</Text>
+                    <Text style={CarritoEstilos.textoValor}>
+                      {direccionEntrega
+                        ? direccionEntrega.titulo
+                        : "Seleccionar Dirección..."}
+                    </Text>
+                  </View>
+                  <FontAwesome5
+                    name="chevron-right"
+                    size={14}
+                    color="#cbd5e1"
+                  />
+                </TouchableOpacity>
+              ) : (
+                <View style={CarritoEstilos.filaDetalle}>
+                  <FontAwesome5 name="walking" size={16} color="#64748b" />
+                  <View style={{ flex: 1, marginLeft: 10 }}>
+                    <Text style={CarritoEstilos.textoEtiqueta}>
+                      Punto de Retiro
+                    </Text>
+                    <Text style={CarritoEstilos.textoValor}>
+                      Misma dirección del restaurante
+                    </Text>
+                  </View>
                 </View>
-                {/* TODO: Add onPress to change address */}
-                {/* <TouchableOpacity>
-                    <Text style={{color: '#C21833', fontWeight: 'bold'}}>Cambiar</Text>
-                 </TouchableOpacity> */}
-              </View>
+              )}
             </View>
 
             {/* Payment Method Section */}

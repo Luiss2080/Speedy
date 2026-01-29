@@ -15,6 +15,9 @@ type ContextoCarritoType = {
   setNotas: (n: string) => void;
   direccionEntrega: any;
   setDireccionEntrega: (d: any) => void;
+  tipoServicio: "delivery" | "retiro";
+  setTipoServicio: (t: "delivery" | "retiro") => void;
+  costoEnvio: number;
 };
 
 const ContextoCarrito = createContext<ContextoCarritoType | undefined>(
@@ -31,6 +34,9 @@ export const CarritoProvider = ({
   const [metodoPago, setMetodoPago] = useState("Efectivo");
   const [notas, setNotas] = useState("");
   const [direccionEntrega, setDireccionEntrega] = useState<any>(null);
+  const [tipoServicio, setTipoServicio] = useState<"delivery" | "retiro">(
+    "delivery",
+  );
 
   const agregarItem = (nuevoItem: ItemCarrito) => {
     setItems((prevItems) => {
@@ -75,6 +81,7 @@ export const CarritoProvider = ({
   );
 
   const cantidadItems = items.reduce((acc, item) => acc + item.cantidad, 0);
+  const costoEnvio = tipoServicio === "retiro" ? 0.0 : 2.0;
 
   return (
     <ContextoCarrito.Provider
@@ -92,6 +99,9 @@ export const CarritoProvider = ({
         setNotas,
         direccionEntrega,
         setDireccionEntrega,
+        tipoServicio,
+        setTipoServicio,
+        costoEnvio,
       }}
     >
       {children}

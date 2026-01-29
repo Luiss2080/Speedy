@@ -18,17 +18,23 @@ export const useCarritoControlador = () => {
     setNotas,
     direccionEntrega,
     setDireccionEntrega,
+    tipoServicio,
+    setTipoServicio,
+    costoEnvio,
   } = useCarrito();
 
   const subtotal = total;
-  const costoEnvio = 2.0;
   const totalPagar = subtotal + costoEnvio;
 
   const procederAlPago = () => {
     if (items.length === 0) return;
 
     // Validation
-    if (!direccionEntrega && (items[0] as any)?.tipo_servicio === "delivery") {
+    if (
+      !direccionEntrega &&
+      (items[0] as any)?.tipo_servicio === "delivery" &&
+      tipoServicio === "delivery"
+    ) {
       // Maybe alert strict requirement, or default to main address if available.
       // For now, let's allow it to be empty and backend defaults to ID 1, STRICTLY FOR DEMO.
       // But better to warn.
@@ -56,9 +62,11 @@ export const useCarritoControlador = () => {
               })),
               metodo_pago: metodoPago,
               notas: notas,
-              direccion_entrega_id: direccionEntrega?.id || 1, // Default to 1 if not selected
+              // If pickup, ensure address is NOT user address, maybe keep null or default to restaurant location
+              direccion_entrega_id:
+                tipoServicio === "delivery" ? direccionEntrega?.id || 1 : null,
               direccion_origen: items[0]?.restaurante || "Restaurante",
-              tipo_servicio: "delivery",
+              tipo_servicio: tipoServicio,
             };
 
             const res = await crearPedido(payload);
@@ -131,6 +139,8 @@ export const useCarritoControlador = () => {
     setNotas,
     direccionEntrega,
     setDireccionEntrega,
+    tipoServicio,
+    setTipoServicio,
     // Helper for finding delivery address in next screens if needed
   };
 };

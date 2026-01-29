@@ -1,7 +1,7 @@
 import { FontAwesome5 } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -15,16 +15,32 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useCarrito } from "../context/ContextoCarrito";
 import { DireccionesEstilos } from "../estilos/DireccionesEstilos";
 import { crearDireccion, getDirecciones } from "../servicios/BaseDeDatos";
 
 export default function DireccionesVista() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const modoSeleccion = params.modo === "seleccion";
+
+  const { setDireccionEntrega, direccionEntrega } = useCarrito();
+
   const [direcciones, setDirecciones] = useState<any[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [nuevoTitulo, setNuevoTitulo] = useState("");
   const [nuevaDireccion, setNuevaDireccion] = useState("");
   const [nuevaReferencia, setNuevaReferencia] = useState("");
+
+  const seleccionarDireccion = (dir: any) => {
+    if (modoSeleccion) {
+      setDireccionEntrega(dir);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      router.back();
+    } else {
+      Haptics.selectionAsync();
+    }
+  };
 
   useEffect(() => {
     cargarDirecciones();
@@ -90,15 +106,31 @@ export default function DireccionesVista() {
         {direcciones.map((dir) => (
           <TouchableOpacity
             key={dir.id}
-            style={DireccionesEstilos.tarjeta}
+            style={[
+              DireccionesEstilos.tarjeta,
+              modoSeleccion &&
+                direccionEntrega?.id === dir.id && {
+                  borderColor: "#C21833",
+                  borderWidth: 2,
+                  backgroundColor: "#fff5f5",
+                },
+            ]}
             activeOpacity={0.7}
-            onPress={() => Haptics.selectionAsync()}
+            onPress={() => seleccionarDireccion(dir)}
           >
             <View
               style={{ flexDirection: "row", alignItems: "center", flex: 1 }}
             >
               <View style={DireccionesEstilos.iconoDireccion}>
-                <FontAwesome5 name="map-marker-alt" size={18} color="#C21833" />
+                <FontAwesome5
+                  name={
+                    modoSeleccion && direccionEntrega?.id === dir.id
+                      ? "check-circle"
+                      : "map-marker-alt"
+                  }
+                  size={18}
+                  color="#C21833"
+                />
               </View>
               <View style={DireccionesEstilos.infoDireccion}>
                 <Text style={DireccionesEstilos.tituloDireccion}>
@@ -116,7 +148,9 @@ export default function DireccionesVista() {
                 ) : null}
               </View>
             </View>
-            <FontAwesome5 name="pen" size={14} color="#9ca3af" />
+            {!modoSeleccion && (
+              <FontAwesome5 name="pen" size={14} color="#9ca3af" />
+            )}
           </TouchableOpacity>
         ))}
 

@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
+import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from "react-native-maps";
 import { SeguimientoEstilos } from "../estilos/SeguimientoEstilos";
 import { API_URL } from "../servicios/BaseDeDatos";
 
@@ -170,6 +170,15 @@ export default function SeguimientoVista() {
           longitudeDelta: 0.015,
         }}
       >
+        {/* Route Line (Delivery Only) */}
+        {!isPickup && (
+          <Polyline
+            coordinates={[driverLoc, userLoc]}
+            strokeColor="#C21833"
+            strokeWidth={4}
+          />
+        )}
+
         {/* User Marker (only for Delivery) */}
         {!isPickup && (
           <Marker
@@ -267,11 +276,30 @@ export default function SeguimientoVista() {
                 ? pedido.restaurante_nombre
                 : pedido.repartidor_nombre || "Buscando conductor..."}
             </Text>
-            <Text style={{ fontSize: 12, color: "#64748b" }}>
-              {isPickup
-                ? pedido.restaurante_direccion
-                : pedido.repartidor_vehiculo || "Moto"}
-            </Text>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Text style={{ fontSize: 12, color: "#64748b", marginRight: 5 }}>
+                {isPickup
+                  ? pedido.restaurante_direccion
+                  : pedido.repartidor_vehiculo || "Moto"}
+              </Text>
+              {!isPickup && pedido.repartidor_id && (
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push(`/repartidor/${pedido.repartidor_id}`)
+                  }
+                >
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: "#C21833",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Ver Perfil
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
           <View style={{ flexDirection: "row", gap: 10 }}>
             <TouchableOpacity

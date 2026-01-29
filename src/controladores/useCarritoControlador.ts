@@ -1,7 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { Alert } from "react-native";
-import { useCarrito } from "../context/ContextoCarrito";
 import { crearPedido } from "../servicios/BaseDeDatos";
 
 export const useCarritoControlador = () => {
@@ -21,7 +20,21 @@ export const useCarritoControlador = () => {
     tipoServicio,
     setTipoServicio,
     costoEnvio,
-  } = useCarrito();
+    cotizarEnvio, // Added: cotizarEnvio
+  } = useContext(ContextoCarrito)!; // Modified: Changed useCarrito() to useContext(ContextoCarrito)!;
+
+  useEffect(() => {
+    if (items.length > 0 && direccionEntrega) {
+      const restauranteId = (items[0] as any).restaurante_id || 1; // Fallback
+      cotizarEnvio(restauranteId, direccionEntrega.id, tipoServicio);
+    }
+  }, [direccionEntrega, tipoServicio, items]);
+
+  useEffect(() => {
+    if (items.length === 0) {
+      router.back();
+    }
+  }, [items]);
 
   const subtotal = total;
   const totalPagar = subtotal + costoEnvio;

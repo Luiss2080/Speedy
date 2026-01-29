@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Producto } from "../modelos/tipos";
+import { API_URL } from "../servicios/BaseDeDatos";
+import { useAuthStore } from "../stores/useAuthStore";
 
 type FavoritoItem = {
   id: string;
@@ -25,21 +27,20 @@ export const FavoritosProvider = ({
   children: React.ReactNode;
 }) => {
   const [favoritos, setFavoritos] = useState<FavoritoItem[]>([]);
-  // Hardcoded user ID for demo
-  const USUARIO_ID = 1;
+  const { user } = useAuthStore();
+  // Hardcoded user ID for demo - REMOVED
 
   useEffect(() => {
-    fetchFavoritos();
-  }, []);
+    if (user?.id) {
+      fetchFavoritos(user.id);
+    } else {
+      setFavoritos([]);
+    }
+  }, [user]);
 
-  const fetchFavoritos = async () => {
+  const fetchFavoritos = async (usuarioId: number) => {
     try {
-      // Use API_URL from BaseDeDatos if imported, or relative if proxy.
-      // For now assuming we need full URL or utilizing same pattern as others.
-      // Let's use hardcoded IP or improved API_URL import if possible.
-      // To be safe I'll use the IP directly as in other files if I can't import easily,
-      // or better: Import API_URL.
-      const res = await fetch(`${API_URL}/favoritos/${USUARIO_ID}`);
+      const res = await fetch(`${API_URL}/api/favoritos/${usuarioId}`);
       const data = await res.json();
       if (Array.isArray(data)) {
         setFavoritos(
@@ -57,6 +58,7 @@ export const FavoritosProvider = ({
     }
   };
 
+  const toggleFavorito = async (producto: Producto) => {
     if (!user) return; // Guard clause
     const esFav = favoritos.some((fav) => fav.id === producto.id);
 

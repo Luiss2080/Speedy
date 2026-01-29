@@ -480,6 +480,68 @@ app.delete("/api/favoritos", async (req, res) => {
   }
 });
 
+// --- METODOS DE PAGO ---
+app.get("/api/pagos/:usuario_id", async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    const [rows] = await connection.query(
+      "SELECT * FROM metodos_pago WHERE usuario_id = ?",
+      [req.params.usuario_id],
+    );
+    res.json(rows);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  } finally {
+    connection.release();
+  }
+});
+
+app.post("/api/pagos", async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    const { usuario_id, marca, ultimos_digitos } = req.body;
+    await connection.query(
+      "INSERT INTO metodos_pago (usuario_id, marca, ultimos_digitos) VALUES (?, ?, ?)",
+      [usuario_id, marca, ultimos_digitos],
+    );
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  } finally {
+    connection.release();
+  }
+});
+
+app.delete("/api/pagos/:id", async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    await connection.query("DELETE FROM metodos_pago WHERE id = ?", [
+      req.params.id,
+    ]);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  } finally {
+    connection.release();
+  }
+});
+
+// --- NOTIFICACIONES ---
+app.get("/api/notificaciones/:usuario_id", async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    const [rows] = await connection.query(
+      "SELECT * FROM notificaciones WHERE usuario_id = ? ORDER BY fecha DESC",
+      [req.params.usuario_id],
+    );
+    res.json(rows);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  } finally {
+    connection.release();
+  }
+});
+
 // Start Server
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Servidor backend corriendo en http://localhost:${PORT}`);

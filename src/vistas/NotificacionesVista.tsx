@@ -4,35 +4,39 @@ import { useRouter } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { NotificacionesEstilos } from "../estilos/NotificacionesEstilos";
 
-const MOCK_NOTIFICACIONES = [
-  {
-    id: 1,
-    titulo: "¡Tu pedido está en camino!",
-    mensaje: "El repartidor ha recogido tu orden y está cerca.",
-    tiempo: "Hace 5 min",
-    icono: "motorcycle",
-    color: "#C21833",
-  },
-  {
-    id: 2,
-    titulo: "50% Descuento en Pizzas",
-    mensaje: "Solo por hoy aprovecha nuestra promoción exclusiva.",
-    tiempo: "Hace 2 horas",
-    icono: "tag",
-    color: "#eab308",
-  },
-  {
-    id: 3,
-    titulo: "Pedido Entregado",
-    mensaje: "Disfruta tu comida. ¡Gracias por preferirnos!",
-    tiempo: "Ayer",
-    icono: "check-circle",
-    color: "#22c55e",
-  },
-];
+import { useEffect, useState } from "react";
+import { API_URL } from "../servicios/BaseDeDatos";
+import { useAuthStore } from "../stores/useAuthStore";
 
 export default function NotificacionesVista() {
   const router = useRouter();
+  const { user } = useAuthStore();
+  const [notificaciones, setNotificaciones] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (user) fetchNotificaciones();
+  }, [user]);
+
+  const fetchNotificaciones = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/notificaciones/${user?.id}`);
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setNotificaciones(
+          data.map((n) => ({
+            id: n.id,
+            titulo: n.titulo,
+            mensaje: n.mensaje,
+            tiempo: new Date(n.fecha).toLocaleDateString(),
+            icono: "bell",
+            color: "#C21833",
+          })),
+        );
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   return (
     <View style={NotificacionesEstilos.contenedor}>
@@ -54,27 +58,33 @@ export default function NotificacionesVista() {
       </LinearGradient>
 
       <ScrollView contentContainerStyle={NotificacionesEstilos.lista}>
-        {MOCK_NOTIFICACIONES.map((noti) => (
-          <View key={noti.id} style={NotificacionesEstilos.item}>
-            <View
-              style={[
-                NotificacionesEstilos.iconoContenedor,
-                { backgroundColor: noti.color + "20" },
-              ]}
-            >
-              <FontAwesome5 name={noti.icono} size={20} color={noti.color} />
+        {notificaciones.length === 0 ? (
+          <Text style={{ textAlign: "center", marginTop: 20, color: "#666" }}>
+            No tienes notificaciones.
+          </Text>
+        ) : (
+          notificaciones.map((noti) => (
+            <View key={noti.id} style={NotificacionesEstilos.item}>
+              <View
+                style={[
+                  NotificacionesEstilos.iconoContenedor,
+                  { backgroundColor: noti.color + "20" },
+                ]}
+              >
+                <FontAwesome5 name={noti.icono} size={20} color={noti.color} />
+              </View>
+              <View style={NotificacionesEstilos.contenido}>
+                <Text style={NotificacionesEstilos.tituloNotificacion}>
+                  {noti.titulo}
+                </Text>
+                <Text style={NotificacionesEstilos.textoNotificacion}>
+                  {noti.mensaje}
+                </Text>
+                <Text style={NotificacionesEstilos.tiempo}>{noti.tiempo}</Text>
+              </View>
             </View>
-            <View style={NotificacionesEstilos.contenido}>
-              <Text style={NotificacionesEstilos.tituloNotificacion}>
-                {noti.titulo}
-              </Text>
-              <Text style={NotificacionesEstilos.textoNotificacion}>
-                {noti.mensaje}
-              </Text>
-              <Text style={NotificacionesEstilos.tiempo}>{noti.tiempo}</Text>
-            </View>
-          </View>
-        ))}
+          ))
+        )}
       </ScrollView>
     </View>
   );

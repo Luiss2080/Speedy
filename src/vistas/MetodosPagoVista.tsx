@@ -1,78 +1,216 @@
 import { FontAwesome5 } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
-import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Modal,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { MetodosPagoEstilos } from "../estilos/MetodosPagoEstilos";
-
-const MOCK_TARJETAS = [
-  { id: "1", numero: "•••• •••• •••• 4242", exp: "12/28", tipo: "cc-visa" },
-  {
-    id: "2",
-    numero: "•••• •••• •••• 8888",
-    exp: "09/26",
-    tipo: "cc-mastercard",
-  },
-];
+import { API_URL } from "../servicios/BaseDeDatos";
+import { useAuthStore } from "../stores/useAuthStore";
 
 export default function MetodosPagoVista() {
   const router = useRouter();
+  const { user } = useAuthStore();
+  const [tarjetas, setTarjetas] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  // Form State
+  const [marca, setMarca] = useState("Visa");
+  const [ultimosDigitos, setUltimosDigitos] = useState("");
+
+  useEffect(() => {
+    if (user) loadTarjetas();
+  }, [user]);
+
+  const loadTarjetas = async () => {
+    if (!user) return;
+    try {
+      setLoading(true);
+      const res = await fetch(`${API_URL}/api/pagos/${user.id}`);
+      const data = await res.json();
+      setTarjetas(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const agregarTarjeta = async () => {
+    if (!ultimosDigitos || ultimosDigitos.length !== 4) {
+      Alert.alert("Error", "Ingresa los últimos 4 dígitos");
+      return;
+    }
+    try {
+      await fetch(`${API_URL}/api/pagos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          usuario_id: user?.id,
+          marca,
+          ultimos_digitos: ultimosDigitos,
+        }),
+      });
+      setModalVisible(false);
+      setUltimosDigitos("");
+      loadTarjetas();
+    } catch (error) {
+      Alert.alert("Error", "No se pudo agregar la tarjeta");
+    }
+  };
+
+  const eliminarTarjeta = async (id: number) => {
+    try {
+      await fetch(`${API_URL}/api/pagos/${id}`, {
+        method: "DELETE",
+      });
+      loadTarjetas();
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <View style={MetodosPagoEstilos.contenedor}>
-      <LinearGradient
-        colors={["#C21833", "#9f1239"]}
-        style={MetodosPagoEstilos.encabezado}
-      >
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={{ marginRight: 15 }}
-          >
-            <FontAwesome5 name="arrow-left" size={20} color="#fff" />
-          </TouchableOpacity>
-          <Text style={MetodosPagoEstilos.tituloEncabezado}>
-            Métodos de Pago
-          </Text>
-        </View>
-      </LinearGradient>
+      <View style={MetodosPagoEstilos.encabezado}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <FontAwesome5 name="arrow-left" size={20} color="#333" />
+        </TouchableOpacity>
+        <Text style={MetodosPagoEstilos.titulo}>Métodos de Pago</Text>
+        <View style={{ width: 20 }} />
+      </View>
 
-      <ScrollView contentContainerStyle={MetodosPagoEstilos.lista}>
-        {MOCK_TARJETAS.map((tarjeta) => (
-          <View key={tarjeta.id} style={MetodosPagoEstilos.tarjeta}>
-            <LinearGradient
-              colors={["#1f2937", "#111827"]}
-              style={MetodosPagoEstilos.fondoTarjeta}
-            />
-            <View style={MetodosPagoEstilos.filaTarjeta}>
-              <FontAwesome5 name="sim-card" size={24} color="#d1d5db" />
-              <FontAwesome5 name={tarjeta.tipo} size={30} color="#333" />
-            </View>
-            <Text style={MetodosPagoEstilos.numeroTarjeta}>
-              {tarjeta.numero}
+      {loading ? (
+        <ActivityIndicator
+          size="large"
+          color="#C21833"
+          style={{ marginTop: 20 }}
+        />
+      ) : (
+        <FlatList
+          data={tarjetas}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={{ padding: 20 }}
+          ListEmptyComponent={
+            <Text style={{ textAlign: "center", color: "#666", marginTop: 20 }}>
+              No tienes tarjetas guardadas.
             </Text>
-            <View style={MetodosPagoEstilos.infoTarjeta}>
-              <View>
-                <Text style={MetodosPagoEstilos.etiqueta}>Titular</Text>
-                <Text style={MetodosPagoEstilos.valor}>JUAN PEREZ</Text>
+          }
+          renderItem={({ item }) => (
+            <View style={MetodosPagoEstilos.tarjeta}>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <FontAwesome5
+                  name={
+                    item.marca.toLowerCase() === "visa"
+                      ? "cc-visa"
+                      : "cc-mastercard"
+                  }
+                  size={30}
+                  color="#333"
+                  style={{ marginRight: 15 }}
+                />
+                <View>
+                  <Text style={MetodosPagoEstilos.textoMarca}>
+                    {item.marca}
+                  </Text>
+                  <Text style={MetodosPagoEstilos.textoNumero}>
+                    **** {item.ultimos_digitos}
+                  </Text>
+                </View>
               </View>
-              <View>
-                <Text style={MetodosPagoEstilos.etiqueta}>Expira</Text>
-                <Text style={MetodosPagoEstilos.valor}>{tarjeta.exp}</Text>
-              </View>
+              <TouchableOpacity onPress={() => eliminarTarjeta(item.id)}>
+                <FontAwesome5 name="trash" size={18} color="#ef4444" />
+              </TouchableOpacity>
+            </View>
+          )}
+        />
+      )}
+
+      <TouchableOpacity
+        style={MetodosPagoEstilos.botonAgregar}
+        onPress={() => setModalVisible(true)}
+      >
+        <Text style={MetodosPagoEstilos.textoBoton}>Agregar Tarjeta</Text>
+      </TouchableOpacity>
+
+      <Modal visible={modalVisible} animationType="slide" transparent>
+        <View style={MetodosPagoEstilos.modalOverlay}>
+          <View style={MetodosPagoEstilos.modalContent}>
+            <Text style={MetodosPagoEstilos.modalTitulo}>Nueva Tarjeta</Text>
+
+            <Text style={{ marginBottom: 5 }}>Marca</Text>
+            <View style={{ flexDirection: "row", gap: 10, marginBottom: 15 }}>
+              <TouchableOpacity
+                onPress={() => setMarca("Visa")}
+                style={{
+                  padding: 10,
+                  borderWidth: 1,
+                  borderColor: marca === "Visa" ? "#C21833" : "#ccc",
+                  borderRadius: 5,
+                }}
+              >
+                <Text style={{ color: marca === "Visa" ? "#C21833" : "#333" }}>
+                  Visa
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setMarca("Mastercard")}
+                style={{
+                  padding: 10,
+                  borderWidth: 1,
+                  borderColor: marca === "Mastercard" ? "#C21833" : "#ccc",
+                  borderRadius: 5,
+                }}
+              >
+                <Text
+                  style={{ color: marca === "Mastercard" ? "#C21833" : "#333" }}
+                >
+                  Mastercard
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={{ marginBottom: 5 }}>Últimos 4 dígitos</Text>
+            <TextInput
+              style={MetodosPagoEstilos.input}
+              value={ultimosDigitos}
+              onChangeText={setUltimosDigitos}
+              keyboardType="numeric"
+              maxLength={4}
+              placeholder="1234"
+            />
+
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "flex-end",
+                gap: 10,
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => setModalVisible(false)}
+                style={MetodosPagoEstilos.botonCancelar}
+              >
+                <Text style={{ color: "#666" }}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={agregarTarjeta}
+                style={MetodosPagoEstilos.botonGuardar}
+              >
+                <Text style={{ color: "#fff" }}>Guardar</Text>
+              </TouchableOpacity>
             </View>
           </View>
-        ))}
-
-        <TouchableOpacity
-          style={MetodosPagoEstilos.botonAgregar}
-          activeOpacity={0.8}
-          onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
-        >
-          <FontAwesome5 name="plus-circle" size={24} color="#d1d5db" />
-          <Text style={MetodosPagoEstilos.textoAgregar}>Agregar Tarjeta</Text>
-        </TouchableOpacity>
-      </ScrollView>
+        </View>
+      </Modal>
     </View>
   );
 }

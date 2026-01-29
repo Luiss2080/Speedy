@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 import { ItemCarrito } from "../modelos/tipos";
+import { API_URL } from "../servicios/BaseDeDatos";
 
 type ContextoCarritoType = {
   items: ItemCarrito[];
@@ -47,6 +48,7 @@ export const CarritoProvider = ({
   const [tipoServicio, setTipoServicio] = useState<"delivery" | "retiro">(
     "delivery",
   );
+  const [costoEnvio, setCostoEnvio] = useState(2.0);
   /* Coupon State */
   const [cupon, setCupon] = useState<any>(null);
 

@@ -33,10 +33,28 @@ export default function PerfilVista() {
         {/* Header / Avatar Section */}
         <View style={PerfilEstilos.encabezado}>
           <View style={PerfilEstilos.contenedorAvatar}>
-            <FontAwesome name={usuario.avatar as any} size={80} color="#333" />
+            <FontAwesome
+              name={(usuario.avatar as any) || "user"}
+              size={80}
+              color="#333"
+            />
           </View>
           <Text style={PerfilEstilos.nombre}>{usuario.nombre}</Text>
           <Text style={PerfilEstilos.correo}>{usuario.email}</Text>
+          <TouchableOpacity
+            onPress={() => router.push("/perfil/editar")}
+            style={{
+              marginTop: 10,
+              backgroundColor: "#f1f5f9",
+              paddingHorizontal: 15,
+              paddingVertical: 5,
+              borderRadius: 15,
+            }}
+          >
+            <Text style={{ color: "#666", fontWeight: "600" }}>
+              Editar Perfil
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* Settings Section */}

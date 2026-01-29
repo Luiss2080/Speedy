@@ -1,5 +1,7 @@
 import { FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useEffect, useState } from "react";
 import {
+  Modal,
   ScrollView,
   Text,
   TextInput,
@@ -8,6 +10,8 @@ import {
 } from "react-native";
 import { useCarritoControlador } from "../controladores/useCarritoControlador";
 import { CarritoEstilos } from "../estilos/CarritoEstilos";
+import { API_URL } from "../servicios/BaseDeDatos";
+import { useAuthStore } from "../stores/useAuthStore";
 
 export default function CarritoVista() {
   const {
@@ -35,6 +39,35 @@ export default function CarritoVista() {
     removerCupon,
     descuento,
   } = useCarritoControlador();
+
+  const { user } = useAuthStore();
+  const [tarjetas, setTarjetas] = useState<any[]>([]);
+  const [modalTarjetasVisible, setModalTarjetasVisible] = useState(false);
+  const [tarjetaSeleccionada, setTarjetaSeleccionada] = useState<any>(null);
+
+  useEffect(() => {
+    if (user && metodoPago === "Tarjeta") {
+      fetchTarjetas();
+    }
+  }, [user, metodoPago]);
+
+  const fetchTarjetas = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/pagos/${user?.id}`);
+      const data = await res.json();
+      setTarjetas(data);
+      if (data.length > 0 && !tarjetaSeleccionada) {
+        setTarjetaSeleccionada(data[0]);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const seleccionarTarjeta = (tarjeta: any) => {
+    setTarjetaSeleccionada(tarjeta);
+    setModalTarjetasVisible(false);
+  };
 
   // ... (keeping return content mostly same until summary)
 
@@ -331,6 +364,59 @@ export default function CarritoVista() {
                   </Text>
                 </TouchableOpacity>
               </View>
+
+              {/* Card Selector */}
+              {metodoPago === "Tarjeta" && (
+                <View style={{ marginTop: 15 }}>
+                  {tarjetas.length > 0 ? (
+                    <TouchableOpacity
+                      onPress={() => setModalTarjetasVisible(true)}
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        backgroundColor: "#f8fafc",
+                        padding: 10,
+                        borderRadius: 10,
+                        borderWidth: 1,
+                        borderColor: "#e2e8f0",
+                      }}
+                    >
+                      <FontAwesome5
+                        name={
+                          tarjetaSeleccionada?.marca?.toLowerCase() === "visa"
+                            ? "cc-visa"
+                            : "cc-mastercard"
+                        }
+                        size={24}
+                        color="#333"
+                        style={{ marginRight: 10 }}
+                      />
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ fontWeight: "bold" }}>
+                          {tarjetaSeleccionada?.marca || "Seleccionar"}
+                        </Text>
+                        <Text style={{ color: "#666" }}>
+                          **** {tarjetaSeleccionada?.ultimos_digitos || "----"}
+                        </Text>
+                      </View>
+                      <FontAwesome5
+                        name="chevron-down"
+                        size={14}
+                        color="#94a3b8"
+                      />
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      onPress={() => router.push("/perfil/pagos")}
+                      style={{ padding: 10 }}
+                    >
+                      <Text style={{ color: "#C21833", fontWeight: "bold" }}>
+                        + Agregar Tarjeta
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )}
             </View>
 
             {/* Notes Section */}
@@ -400,6 +486,76 @@ export default function CarritoVista() {
           </View>
         )}
       </ScrollView>
+
+      {/* Card Selection Modal */}
+      <Modal visible={modalTarjetasVisible} transparent animationType="slide">
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "flex-end",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "#fff",
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              padding: 20,
+              maxHeight: "50%",
+            }}
+          >
+            <Text
+              style={{ fontSize: 18, fontWeight: "bold", marginBottom: 15 }}
+            >
+              Selecciona una Tarjeta
+            </Text>
+            <ScrollView>
+              {tarjetas.map((t) => (
+                <TouchableOpacity
+                  key={t.id}
+                  onPress={() => seleccionarTarjeta(t)}
+                  style={{
+                    padding: 15,
+                    borderBottomWidth: 1,
+                    borderBottomColor: "#f1f5f9",
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <FontAwesome5
+                    name={
+                      t.marca.toLowerCase() === "visa"
+                        ? "cc-visa"
+                        : "cc-mastercard"
+                    }
+                    size={24}
+                    color="#333"
+                    style={{ marginRight: 15 }}
+                  />
+                  <Text style={{ fontSize: 16 }}>
+                    {t.marca} **** {t.ultimos_digitos}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <TouchableOpacity
+              onPress={() => setModalTarjetasVisible(false)}
+              style={{
+                marginTop: 20,
+                padding: 15,
+                backgroundColor: "#f1f5f9",
+                borderRadius: 10,
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ fontWeight: "bold", color: "#666" }}>
+                Cancelar
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

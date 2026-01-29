@@ -1,0 +1,8 @@
+{
+  "message": "Duplicate column name 'metodo_pago'",
+  "code": "ER_DUP_FIELDNAME",
+  "errno": 1060,
+  "sql": "USE Speedy;\r\n\r\nALTER TABLE pedidos\r\nADD COLUMN metodo_pago VARCHAR(50) DEFAULT 'Efectivo',\r\nADD COLUMN notas TEXT,\r\nADD COLUMN direccion_origen TEXT,\r\nADD COLUMN tipo_servicio VARCHAR(50) DEFAULT 'delivery';\r\n",
+  "sqlState": "42S21",
+  "sqlMessage": "Duplicate column name 'metodo_pago'"
+}

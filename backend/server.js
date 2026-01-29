@@ -221,8 +221,8 @@ app.post("/api/pedidos", async (req, res) => {
     const [pedidoResult] = await connection.query(
       `INSERT INTO pedidos (
         codigo_seguimiento, usuario_id, restaurante_id, direccion_entrega_id, 
-        subtotal, costo_envio, total_final, estado
-       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        subtotal, costo_envio, total_final, estado, metodo_pago, notas, direccion_origen, tipo_servicio
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         codigo,
         finalUserId,
@@ -232,6 +232,10 @@ app.post("/api/pedidos", async (req, res) => {
         2.0,
         total,
         "pendiente",
+        req.body.metodo_pago || "Efectivo",
+        req.body.notas || "",
+        req.body.direccion_origen || "",
+        req.body.tipo_servicio || "delivery",
       ],
     );
 

@@ -7,14 +7,7 @@ export const useExplorarControlador = () => {
   const [categoriaActiva, setCategoriaActiva] = useState("Todos");
   const [recursos, setRecursos] = useState<Recurso[]>([]);
 
-  const categorias = [
-    "Todos",
-    "Hamburguesas",
-    "Pizza",
-    "Sushi",
-    "Postres",
-    "Bebidas",
-  ];
+  const [categorias, setCategorias] = useState<string[]>(["Todos"]);
 
   useEffect(() => {
     cargarDatos();
@@ -45,11 +38,12 @@ export const useExplorarControlador = () => {
       setRecursos(items);
 
       // Update dynamic categories list
+      // Update dynamic categories list
       const uniqueCats = [
         "Todos",
         ...Array.from(new Set(items.map((i: any) => i.categoria))),
       ];
-      // setCategorias(uniqueCats); // We need to expose setCategorias if we want dynamic
+      setCategorias(uniqueCats as string[]);
     } catch (e) {
       console.error("Error cargando productos", e);
     }

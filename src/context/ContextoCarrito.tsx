@@ -120,7 +120,39 @@ export const CarritoProvider = ({
     if (tipoServicio === "delivery") setCostoEnvio(2.0); // Would be better to re-quote
   };
 
-  // ... (agregarItem, removerItem, etc.)
+  const agregarItem = (nuevoItem: ItemCarrito) => {
+    setItems((prev) => {
+      // Simple logic: if exists (same ID), increment quantity.
+      // Note: In a real app, you might compare extras/options too.
+      const index = prev.findIndex((i) => i.id === nuevoItem.id);
+      if (index >= 0) {
+        const newItems = [...prev];
+        newItems[index].cantidad += nuevoItem.cantidad;
+        return newItems;
+      }
+      return [...prev, nuevoItem];
+    });
+  };
+
+  const removerItem = (id: string) => {
+    setItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const actualizarCantidad = (id: string, cantidad: number) => {
+    if (cantidad < 1) {
+      removerItem(id);
+      return;
+    }
+    setItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, cantidad } : item)),
+    );
+  };
+
+  const limpiarCarrito = () => {
+    setItems([]);
+    setCupon(null);
+    setCostoEnvio(2.0);
+  };
 
   const subTotal = items.reduce(
     (sum, item) => sum + item.precio * item.cantidad,

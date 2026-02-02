@@ -24,7 +24,7 @@ export default function DriverPerfil() {
 
   const handleLogout = () => {
     logout();
-    router.replace("/login");
+    router.replace("/");
   };
 
   const guardarCambios = async () => {
@@ -35,7 +35,7 @@ export default function DriverPerfil() {
         body: JSON.stringify({
           nombre,
           email,
-          password: user?.password || "123456",
+          // Removed password field as it is not part of the User type and shouldn't be sent if unchanged
         }),
       });
       Alert.alert("Éxito", "Perfil actualizado correctamente");

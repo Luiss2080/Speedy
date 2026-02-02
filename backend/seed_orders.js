@@ -41,28 +41,22 @@ async function seedOrders() {
 
       // Insert Order
       const [res] = await connection.query(
-        "INSERT INTO pedidos (usuario_id, restaurante_id, total_final, estado, direccion_entrega_texto, costo_envio, fecha_creacion, codigo_seguimiento) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO pedidos (usuario_id, restaurante_id, total_final, subtotal, costo_envio, estado, direccion_entrega_id, fecha_creacion, codigo_seguimiento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           userId,
           rest.id,
           total,
-          status,
-          "Av. Banzer #123",
+          (total - (rest.costo_envio_base || 5)).toFixed(2),
           rest.costo_envio_base || 5.0,
+          status,
+          1, // Default address ID
           date,
           `ORD-${1000 + i}`,
         ],
       );
 
       const pedidoId = res.insertId;
-
-      // Insert Details (try table name variations if needed, but assuming detalle_pedido based on common patterns)
-      // Actually, let's verify table name first.
-      // But for now, let's assume 'detalles_pedido' or 'detalle_pedidos' doesn't matter if we just show the main list first.
-      // Wait, the detailed view needs items.
-
-      // Let's try inserting generic items if possible, but schema is unknown.
-      // Skipping detail insertion for now to ensure at least the list works.
+      console.log(`Inserted order ${pedidoId}`);
     }
 
     console.log("✅ 12 Orders seeded successfully.");

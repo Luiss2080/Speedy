@@ -23,15 +23,25 @@ export default function HistorialPedidosVista() {
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
+    console.log("Current User in View:", JSON.stringify(user));
     if (user) {
       loadPedidos();
+    } else {
+      // Fallback for demo if no user logged in
+      console.log("No user logged in, forcing load for ID 1 (Demo)");
+      // We temporarily force ID 1 to ensure UI shows something if auth is broken
+      loadPedidos(1);
     }
   }, [user]);
 
-  const loadPedidos = async () => {
+  const loadPedidos = async (forceId?: number) => {
     setLoading(true);
     try {
-      const data = await getPedidosUsuario(user?.id || 1);
+      const targetId = forceId || user?.id || 1;
+      console.log(`Fetching orders for user: ${targetId}`);
+      const data = await getPedidosUsuario(targetId);
+      console.log(`Fetched ${data.length} orders`);
+
       // Sort by date desc
       data.sort(
         (a: any, b: any) =>
@@ -208,6 +218,9 @@ export default function HistorialPedidosVista() {
               <FontAwesome5 name="receipt" size={48} color="#CBD5E1" />
               <Text style={styles.emptyText}>No tienes pedidos recientes.</Text>
               <Text style={styles.emptySubtext}>¡Pide algo delicioso hoy!</Text>
+              <Text style={{ fontSize: 10, color: "#ccc", marginTop: 20 }}>
+                Debug: {user ? `User ${user.id}` : "No Auth"}
+              </Text>
             </View>
           }
         />

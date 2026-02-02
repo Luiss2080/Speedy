@@ -8,6 +8,7 @@ interface User {
   email?: string;
   rol: "cliente" | "repartidor" | "admin" | "restaurante";
   avatar?: string;
+  telefono?: string;
 }
 
 interface RepartidorInfo {

@@ -48,13 +48,52 @@ export const useExplorarControlador = () => {
       const catMap = new Map();
       dbCategorias.forEach((c: any) => catMap.set(c.id, c.nombre));
 
-      const items = productos.map((p: any) => ({
-        id: p.id.toString(),
-        titulo: p.nombre,
-        descripcion: `${p.descripcion} • $${p.precio}`,
-        categoria: catMap.get(p.categoria_id) || "Varios", // Map ID to Name
-        imagen: p.imagen,
-      }));
+      const items = productos.map((p: any) => {
+        // Robust fallback: Infer category from name if missing from DB relation
+        let cat = catMap.get(p.categoria_id) || "Varios";
+
+        if (cat === "Varios") {
+          const lowerName = p.nombre.toLowerCase();
+          const lowerDesc = (p.descripcion || "").toLowerCase();
+
+          if (
+            lowerName.includes("hamburguesa") ||
+            lowerDesc.includes("hamburguesa") ||
+            lowerName.includes("burger")
+          )
+            cat = "Hamburguesas";
+          else if (lowerName.includes("pizza") || lowerDesc.includes("pizza"))
+            cat = "Pizza";
+          else if (lowerName.includes("sushi") || lowerDesc.includes("rollo"))
+            cat = "Sushi";
+          else if (lowerName.includes("taco")) cat = "Tacos";
+          else if (lowerName.includes("ensalada")) cat = "Ensaladas";
+          else if (
+            lowerName.includes("bebida") ||
+            lowerName.includes("refresco") ||
+            lowerName.includes("coca") ||
+            lowerName.includes("agua")
+          )
+            cat = "Bebidas";
+          else if (
+            lowerName.includes("postre") ||
+            lowerName.includes("helado") ||
+            lowerName.includes("pastel") ||
+            lowerName.includes("cake")
+          )
+            cat = "Postres";
+          else if (lowerName.includes("cafe") || lowerName.includes("café"))
+            cat = "Desayunos";
+        }
+
+        return {
+          id: p.id.toString(),
+          titulo: p.nombre,
+          descripcion: `${p.descripcion} • $${p.precio}`,
+          categoria: cat,
+          imagen: p.imagen,
+        };
+      });
       setRecursos(items);
 
       // Update dynamic categories list

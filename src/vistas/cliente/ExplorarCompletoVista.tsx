@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F8FAFC" },
   header: {
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === "android" ? 50 : 20, // Adjusted for status bar
+    paddingTop: 10, // Reduced padding as SafeAreaView handles the status bar
     paddingBottom: 10,
     backgroundColor: "#fff",
     borderBottomWidth: 1,

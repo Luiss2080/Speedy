@@ -103,16 +103,23 @@ export const useExplorarControlador = () => {
         ...Array.from(new Set(items.map((i: any) => i.categoria))),
       ];
       // Update dynamic categories list
-      const uniqueNames = Array.from(
-        new Set(items.map((i: any) => i.categoria)),
-      );
-      const richCats = [
-        { name: "Todos", icon: "utensils" },
-        ...uniqueNames.map((name) => ({
-          name: name as string,
-          icon: ICON_MAP[name as string] || "utensils",
-        })),
+      // The user wants ALL buttons visible even if empty, and NO 'Varios' button.
+      const CORE_CATEGORIES = [
+        "Todos",
+        "Hamburguesas",
+        "Pizza",
+        "Sushi",
+        "Postres",
+        "Bebidas",
+        "Tacos",
+        "Ensaladas",
+        "Desayunos",
       ];
+
+      const richCats = CORE_CATEGORIES.map((name) => ({
+        name: name,
+        icon: ICON_MAP[name] || "utensils",
+      }));
       setCategorias(richCats);
     } catch (e) {
       console.error("Error cargando productos", e);

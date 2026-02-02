@@ -39,7 +39,7 @@ export default function TabLayout() {
         options={{
           title: "Explorar",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={24} name="magnifyingglass" color={color} />
+            <IconSymbol size={24} name="paperplane.fill" color={color} />
           ),
         }}
       />
@@ -61,6 +61,9 @@ export default function TabLayout() {
           ),
         }}
       />
+      {/* HIDDEN TABS */}
+      <Tabs.Screen name="index" options={{ href: null }} />
+      <Tabs.Screen name="detalle-pedido" options={{ href: null }} />
     </Tabs>
   );
 }

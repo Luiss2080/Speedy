@@ -29,28 +29,24 @@ async function seedOrders() {
       addressId = addresses[0].id;
     } else {
       console.log("Creating dummy address...");
-      // Assuming simplistic schema for demo based on common sense, if it fails I'll check schema.
-      // Trying generic insert. If it fails, I'll default to just not crashing (but FK will fail).
-      // Let's check schema first? No, let's try a safe insert.
-      // Wait, I don't know the schema of direcciones.
-      // I'll assume: usuario_id, direccion, nombre (label).
-      // If this fails, I will be stuck.
-      // BETTER: Check schema of direcciones quickly?
-      // No, I will try to insert and catch error.
-
-      // Actually, to be robust, I will inspect schema in a separate quick script or just guess common fields.
-      // Let's try to insert with minimal fields.
       try {
+        // Corrected columns: titulo, calle_numero
         const [addrRes] = await connection.query(
-          "INSERT INTO direcciones (usuario_id, nombre, direccion, latitud, longitud) VALUES (?, ?, ?, ?, ?)",
-          [userId, "Casa", "Av. Banzer #123", -17.0, -63.0],
+          "INSERT INTO direcciones (usuario_id, titulo, calle_numero, latitud, longitud, ciudad, codigo_postal, referencia) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+          [
+            userId,
+            "Casa",
+            "Av. Banzer #123",
+            -17.0,
+            -63.0,
+            "Santa Cruz",
+            "0000",
+            "Porton negro",
+          ],
         );
         addressId = addrRes.insertId;
       } catch (e) {
-        console.log(
-          "Could not insert address, trying generic ID 1 anyway.",
-          e.message,
-        );
+        console.log("Could not insert address:", e.message);
       }
     }
 
@@ -61,6 +57,9 @@ async function seedOrders() {
       "en_camino",
       "preparando",
     ];
+
+    // Clear existing for cleaner demo
+    // await connection.query("DELETE FROM pedidos WHERE usuario_id = ?", [userId]);
 
     for (let i = 0; i < 12; i++) {
       const rest = restaurants[Math.floor(Math.random() * restaurants.length)];
@@ -85,7 +84,7 @@ async function seedOrders() {
         ],
       );
 
-      console.log(`Inserted order ${res.insertId}`);
+      console.log(`Inserted order ${res.insertId} with status ${status}`);
     }
 
     console.log("✅ 12 Orders seeded successfully.");

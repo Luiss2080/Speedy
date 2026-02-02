@@ -11,10 +11,10 @@ async function checkSchema() {
 
   try {
     const [rows] = await connection.query("DESCRIBE usuarios");
-    console.table(rows);
+    console.log("USERS SCHEMA:", JSON.stringify(rows, null, 2));
 
     const [repRows] = await connection.query("DESCRIBE repartidores");
-    console.table(repRows);
+    console.log("REPARTIDORES SCHEMA:", JSON.stringify(repRows, null, 2));
   } catch (error) {
     console.error(error);
   } finally {

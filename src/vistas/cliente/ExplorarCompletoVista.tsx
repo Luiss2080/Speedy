@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F8FAFC" },
   header: {
     paddingHorizontal: 20,
-    paddingTop: 15,
+    paddingTop: Platform.OS === "android" ? 50 : 20, // Adjusted for status bar
     paddingBottom: 10,
     backgroundColor: "#fff",
     borderBottomWidth: 1,

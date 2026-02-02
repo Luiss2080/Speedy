@@ -285,7 +285,7 @@ export default function SeguimientoVista() {
               {!isPickup && pedido.repartidor_id && (
                 <TouchableOpacity
                   onPress={() =>
-                    router.push(`/repartidor/${pedido.repartidor_id}`)
+                    router.push(`/repartidor/${pedido.repartidor_id}` as any)
                   }
                 >
                   <Text

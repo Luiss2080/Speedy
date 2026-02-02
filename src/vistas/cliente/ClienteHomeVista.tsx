@@ -38,6 +38,14 @@ export default function ClienteHomeVista() {
     setRestaurantes(rests);
   };
 
+  const getValidImageSource = (image: string) => {
+    if (!image) return { uri: "https://via.placeholder.com/300" };
+    if (image.startsWith("http")) return { uri: image };
+    // Robust fallback for partial IDs or random strings
+    const seed = image.split("").reduce((a, b) => a + b.charCodeAt(0), 0);
+    return { uri: `https://picsum.photos/seed/${seed}/400/300` };
+  };
+
   const renderRestaurantCard = (rest: any) => (
     <TouchableOpacity
       key={rest.id}
@@ -46,12 +54,7 @@ export default function ClienteHomeVista() {
       onPress={() => router.push(`/restaurante/${rest.id}`)}
     >
       <Image
-        source={{
-          uri: rest.imagen_portada?.startsWith("http")
-            ? rest.imagen_portada
-            : `https://images.unsplash.com/photo-${rest.imagen_portada}` ||
-              "https://via.placeholder.com/300",
-        }}
+        source={getValidImageSource(rest.imagen_portada)}
         style={styles.cardImage}
       />
       <View style={styles.timeBadge}>

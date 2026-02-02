@@ -7,7 +7,27 @@ export const useExplorarControlador = () => {
   const [categoriaActiva, setCategoriaActiva] = useState("Todos");
   const [recursos, setRecursos] = useState<Recurso[]>([]);
 
-  const [categorias, setCategorias] = useState<string[]>(["Todos"]);
+  interface CategoryItem {
+    name: string;
+    icon: string;
+    id?: string;
+  }
+  const [categorias, setCategorias] = useState<CategoryItem[]>([
+    { name: "Todos", icon: "utensils" },
+  ]);
+
+  const ICON_MAP: Record<string, string> = {
+    Hamburguesas: "hamburger",
+    Pizza: "pizza-slice",
+    Sushi: "fish",
+    Postres: "ice-cream",
+    Bebidas: "glass-cheers",
+    Tacos: "pepper-hot",
+    Ensaladas: "carrot",
+    Desayunos: "coffee",
+    Almuerzos: "drumstick-bite",
+    Cenas: "moon",
+  };
 
   useEffect(() => {
     cargarDatos();
@@ -43,7 +63,18 @@ export const useExplorarControlador = () => {
         "Todos",
         ...Array.from(new Set(items.map((i: any) => i.categoria))),
       ];
-      setCategorias(uniqueCats as string[]);
+      // Update dynamic categories list
+      const uniqueNames = Array.from(
+        new Set(items.map((i: any) => i.categoria)),
+      );
+      const richCats = [
+        { name: "Todos", icon: "utensils" },
+        ...uniqueNames.map((name) => ({
+          name: name as string,
+          icon: ICON_MAP[name as string] || "utensils",
+        })),
+      ];
+      setCategorias(richCats);
     } catch (e) {
       console.error("Error cargando productos", e);
     }

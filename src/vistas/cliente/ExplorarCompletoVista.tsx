@@ -105,19 +105,25 @@ export default function ExplorarCompletoVista() {
             contentContainerStyle={{ paddingHorizontal: 5 }}
             renderItem={({ item }) => (
               <TouchableOpacity
-                onPress={() => setCategoriaActiva(item)}
+                onPress={() => setCategoriaActiva(item.name)}
                 style={[
                   styles.tag,
-                  categoriaActiva === item && styles.tagActive,
+                  categoriaActiva === item.name && styles.tagActive,
                 ]}
               >
+                <FontAwesome5
+                  name={item.icon}
+                  size={14}
+                  color={categoriaActiva === item.name ? "#fff" : "#64748B"}
+                  style={{ marginRight: 8 }}
+                />
                 <Text
                   style={[
                     styles.tagText,
-                    categoriaActiva === item && styles.tagTextActive,
+                    categoriaActiva === item.name && styles.tagTextActive,
                   ]}
                 >
-                  {item}
+                  {item.name}
                 </Text>
               </TouchableOpacity>
             )}

@@ -100,7 +100,7 @@ export default function ExplorarCompletoVista() {
             data={categorias}
             horizontal
             showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => item}
+            keyExtractor={(item) => item.name}
             style={styles.tagsContainer}
             contentContainerStyle={{ paddingHorizontal: 5 }}
             renderItem={({ item }) => (
@@ -192,6 +192,8 @@ const styles = StyleSheet.create({
     marginRight: 10,
     borderWidth: 1,
     borderColor: "transparent",
+    flexDirection: "row",
+    alignItems: "center",
   },
   tagActive: {
     backgroundColor: "#EA052C",

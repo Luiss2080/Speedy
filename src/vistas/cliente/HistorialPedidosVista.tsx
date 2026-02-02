@@ -1,9 +1,11 @@
+import { FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
   Image,
+  RefreshControl,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -18,6 +20,7 @@ export default function HistorialPedidosVista() {
   const { user } = useAuthStore();
   const [pedidos, setPedidos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -27,69 +30,162 @@ export default function HistorialPedidosVista() {
 
   const loadPedidos = async () => {
     setLoading(true);
-    // Ensure user.id is passed correctly (assuming user object has id)
-    const data = await getPedidosUsuario(user?.id || 1);
-    setPedidos(data);
-    setLoading(false);
+    try {
+      const data = await getPedidosUsuario(user?.id || 1);
+      // Sort by date desc
+      data.sort(
+        (a: any, b: any) =>
+          new Date(b.fecha_creacion).getTime() -
+          new Date(a.fecha_creacion).getTime(),
+      );
+      setPedidos(data);
+    } catch (error) {
+      console.error("Error loading orders:", error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   };
 
-  const renderItem = ({ item }: { item: any }) => (
-    <View style={styles.card}>
-      <Image
-        source={{
-          uri: item.imagen_restaurante || "https://via.placeholder.com/50",
-        }}
-        style={styles.logo}
-        resizeMode="contain"
-      />
-      <View style={styles.info}>
-        <View style={styles.row}>
-          <Text style={styles.restName}>
-            {item.nombre_restaurante || "Restaurante"}
-          </Text>
-          <Text style={styles.total}>${parseFloat(item.total).toFixed(2)}</Text>
-        </View>
-        <Text style={styles.items}>
-          {item.fecha_creacion
-            ? new Date(item.fecha_creacion).toLocaleDateString()
-            : "Fecha desc."}
-        </Text>
-        <View style={styles.row}>
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadPedidos();
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case "entregado":
+      case "completado":
+        return {
+          bg: "#DCFCE7",
+          text: "#166534",
+          icon: "check-circle",
+          iconColor: "#166534",
+        };
+      case "cancelado":
+        return {
+          bg: "#FEE2E2",
+          text: "#991B1B",
+          icon: "times-circle",
+          iconColor: "#991B1B",
+        };
+      case "preparando":
+      case "en_camino":
+        return {
+          bg: "#FEF9C3",
+          text: "#854D0E",
+          icon: "clock",
+          iconColor: "#854D0E",
+        };
+      default:
+        return {
+          bg: "#F3F4F6",
+          text: "#374151",
+          icon: "info-circle",
+          iconColor: "#374151",
+        };
+    }
+  };
+
+  const renderItem = ({ item }: { item: any }) => {
+    const statusStyle = getStatusColor(item.estado);
+
+    return (
+      <TouchableOpacity
+        style={styles.card}
+        activeOpacity={0.9}
+        onPress={() =>
+          router.push({
+            pathname: "/(client-tabs)/inicio",
+            params: { openOrder: item.id },
+          } as any)
+        }
+      >
+        <View style={styles.cardHeader}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Image
+              source={{
+                uri: item.imagen_restaurante
+                  ? item.imagen_restaurante.startsWith("http")
+                    ? item.imagen_restaurante
+                    : `https://images.unsplash.com/photo-${item.imagen_restaurante}`
+                  : "https://via.placeholder.com/50",
+              }}
+              style={styles.logo}
+              resizeMode="cover"
+            />
+            <View style={{ marginLeft: 12 }}>
+              <Text style={styles.restName}>
+                {item.nombre_restaurante || "Restaurante"}
+              </Text>
+              <Text style={styles.dateText}>
+                {new Date(item.fecha_creacion).toLocaleDateString()} •{" "}
+                {new Date(item.fecha_creacion).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </Text>
+            </View>
+          </View>
           <View
-            style={[
-              styles.statusBadge,
-              item.estado === "cancelado"
-                ? styles.statusRed
-                : styles.statusGreen,
-            ]}
+            style={[styles.statusBadge, { backgroundColor: statusStyle.bg }]}
           >
-            <Text
-              style={[
-                styles.statusText,
-                item.estado === "cancelado" ? styles.textRed : styles.textGreen,
-              ]}
-            >
+            <FontAwesome5
+              name={statusStyle.icon}
+              size={10}
+              color={statusStyle.iconColor}
+              style={{ marginRight: 4 }}
+            />
+            <Text style={[styles.statusText, { color: statusStyle.text }]}>
               {item.estado ? item.estado.toUpperCase() : "PENDIENTE"}
             </Text>
           </View>
-          <TouchableOpacity style={styles.reorderBtn}>
-            <Text style={styles.reorderText}>Reordenar</Text>
-          </TouchableOpacity>
         </View>
-      </View>
-    </View>
-  );
+
+        <View style={styles.divider} />
+
+        <View style={styles.cardContent}>
+          <View style={styles.orderInfo}>
+            <Text style={styles.orderLabel}>
+              Pedido #{item.codigo_seguimiento || item.id}
+            </Text>
+            <Text style={styles.itemCount}>Ver detalles {">"}</Text>
+          </View>
+          <View style={styles.totalContainer}>
+            <Text style={styles.totalLabel}>Total</Text>
+            <Text style={styles.totalValue}>
+              ${parseFloat(item.total_final || item.total).toFixed(2)}
+            </Text>
+          </View>
+        </View>
+
+        {(item.estado === "entregado" || item.estado === "cancelado") && (
+          <View style={styles.actionsFooter}>
+            <TouchableOpacity style={styles.actionBtn}>
+              <Text style={styles.actionBtnText}>Ayuda</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.actionBtn, styles.primaryBtn]}>
+              <Text style={[styles.actionBtnText, styles.primaryBtnText]}>
+                Reordenar
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.header}>
         <Text style={styles.title}>Mis Pedidos</Text>
+        <TouchableOpacity style={styles.filterBtn}>
+          <FontAwesome5 name="sliders-h" size={16} color="#1E293B" />
+        </TouchableOpacity>
       </View>
 
       {loading ? (
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
+        <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color="#EA052C" />
         </View>
       ) : (
@@ -99,11 +195,18 @@ export default function HistorialPedidosVista() {
           renderItem={renderItem}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={["#EA052C"]}
+            />
+          }
           ListEmptyComponent={
-            <View style={{ alignItems: "center", marginTop: 50 }}>
-              <Text style={{ color: "#94A3B8" }}>
-                No tienes pedidos recientes.
-              </Text>
+            <View style={styles.centerContainer}>
+              <FontAwesome5 name="receipt" size={48} color="#CBD5E1" />
+              <Text style={styles.emptyText}>No tienes pedidos recientes.</Text>
+              <Text style={styles.emptySubtext}>¡Pide algo delicioso hoy!</Text>
             </View>
           }
         />
@@ -115,51 +218,128 @@ export default function HistorialPedidosVista() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F8FAFC" },
   header: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
     backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
-  },
-  title: { fontSize: 24, fontWeight: "bold", color: "#1E293B" },
-  list: { padding: 20 },
-  card: {
-    flexDirection: "row",
-    backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 2,
-  },
-  logo: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 15,
-    backgroundColor: "#F8FAFC",
-  },
-  info: { flex: 1 },
-  row: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 5,
   },
-  restName: { fontSize: 16, fontWeight: "bold", color: "#1E293B" },
-  total: { fontWeight: "bold", color: "#1E293B" },
-  items: { color: "#64748B", fontSize: 13, marginVertical: 5 },
+  title: { fontSize: 28, fontWeight: "800", color: "#1E293B" },
+  filterBtn: {
+    padding: 10,
+    backgroundColor: "#F1F5F9",
+    borderRadius: 8,
+  },
+  list: { padding: 20, paddingBottom: 100 },
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 50,
+  },
+  emptyText: {
+    color: "#64748B",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 15,
+  },
+  emptySubtext: { color: "#94A3B8", fontSize: 14, marginTop: 5 },
+
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: "#64748B",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#F1F5F9",
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  logo: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: "#F1F5F9",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+  restName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#1E293B",
+    marginBottom: 2,
+  },
+  dateText: { fontSize: 12, color: "#94A3B8" },
+
   statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 5,
-    alignSelf: "flex-start",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    flexDirection: "row",
+    alignItems: "center",
   },
-  statusGreen: { backgroundColor: "#DCFCE7" },
-  statusRed: { backgroundColor: "#FEE2E2" },
-  statusText: { fontSize: 11, fontWeight: "bold" },
-  textGreen: { color: "#166534" },
-  textRed: { color: "#991B1B" },
-  reorderBtn: { paddingVertical: 5, paddingHorizontal: 12 },
-  reorderText: { color: "#EA052C", fontWeight: "bold", fontSize: 14 },
+  statusText: { fontSize: 10, fontWeight: "800", letterSpacing: 0.5 },
+
+  divider: { height: 1, backgroundColor: "#F1F5F9", marginVertical: 12 },
+
+  cardContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  orderInfo: { flex: 1 },
+  orderLabel: { color: "#64748B", fontSize: 13, fontWeight: "500" },
+  itemCount: {
+    color: "#EA052C",
+    fontSize: 12,
+    marginTop: 2,
+    fontWeight: "600",
+  },
+
+  totalContainer: { alignItems: "flex-end" },
+  totalLabel: {
+    fontSize: 11,
+    color: "#94A3B8",
+    textTransform: "uppercase",
+    fontWeight: "bold",
+  },
+  totalValue: { fontSize: 18, fontWeight: "800", color: "#1E293B" },
+
+  actionsFooter: {
+    flexDirection: "row",
+    marginTop: 15,
+    justifyContent: "flex-end",
+    gap: 10,
+  },
+  actionBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: "#F8FAFC",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+  actionBtnText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#475569",
+  },
+  primaryBtn: {
+    backgroundColor: "#FEF2F2",
+    borderColor: "#FECACA",
+  },
+  primaryBtnText: {
+    color: "#EA052C",
+  },
 });

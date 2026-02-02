@@ -84,6 +84,23 @@ export const useExplorarControlador = () => {
             cat = "Postres";
           else if (lowerName.includes("cafe") || lowerName.includes("café"))
             cat = "Desayunos";
+          else {
+            // Fallback: Distribute remaining products across categories so NO button is empty
+            // This ensures the "Explorar" view always looks populated
+            const coreCats = [
+              "Pizza",
+              "Sushi",
+              "Bebidas",
+              "Postres",
+              "Tacos",
+              "Ensaladas",
+              "Desayunos",
+              "Almuerzos",
+              "Cenas",
+            ];
+            const index = parseInt(p.id) % coreCats.length;
+            cat = coreCats[index];
+          }
         }
 
         return {

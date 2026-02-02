@@ -1,15 +1,23 @@
 # 05_Credenciales de Acceso
 
-Actualmente, la aplicación se encuentra en **Modo Demo**, por lo que la validación es permisiva para facilitar las pruebas.
+Actualmente, la aplicación cuenta con usuarios predefinidos para pruebas.
 
-## Usuario Predefinido (Datos Mock)
+## Cliente (Usuario Principal)
 
-Estos son los datos que se visualizan en el Perfil y se asumen para las sesiones de prueba:
+Puede iniciar sesión con **Correo** o **Nombre de Usuario**.
 
-- **Usuario**: `Admin` o `Usuario Demo`
-- **Correo Electrónico**: `usuario@ejemplo.com`
-- **Contraseña / PIN**: `1234` (Opcional en esta versión)
+- **Correo**: `demo@speedy.com`
+- **Usuario**: `Usuario Demo`
+- **Contraseña**: `123456`
+
+## Repartidor (Driver)
+
+Para probar la funcionalidad de conductor:
+
+- **Correo**: `repartidor@speedy.com`
+- **Usuario**: `Repartidor Demo`
+- **Contraseña**: `demo123`
 
 ## Nota
 
-Para ingresar al sistema, basta con introducir cualquier nombre de usuario en la pantalla de login. El sistema cargará automáticamente los datos del usuario de prueba (ID: 1) para las relaciones de base de datos (Direcciones, Pedidos).
+El sistema de Login admite tanto el **nombre de usuario** como el **correo electrónico**. Para una mejor experiencia, se recomienda usar el correo.

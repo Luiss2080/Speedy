@@ -97,6 +97,20 @@ export default function HistorialPedidosVista() {
     }
   };
 
+  const getValidImageSource = (image: string | null | undefined) => {
+    if (!image) return { uri: "https://via.placeholder.com/150" };
+    if (image.startsWith("http")) return { uri: image };
+    // Robust fallback for partial IDs or random strings
+    // Use a simple hash to generate a consistent index
+    let hash = 0;
+    for (let i = 0; i < image.length; i++) {
+      hash = (hash << 5) - hash + image.charCodeAt(i);
+      hash |= 0;
+    }
+    const seed = Math.abs(hash);
+    return { uri: `https://picsum.photos/seed/${seed}/200` };
+  };
+
   const renderItem = ({ item }: { item: any }) => {
     const statusStyle = getStatusColor(item.estado);
     const date = new Date(item.fecha_creacion);
@@ -115,13 +129,7 @@ export default function HistorialPedidosVista() {
         <View style={styles.cardHeader}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Image
-              source={{
-                uri: item.imagen_restaurante
-                  ? item.imagen_restaurante.startsWith("http")
-                    ? item.imagen_restaurante
-                    : `https://images.unsplash.com/photo-${item.imagen_restaurante}`
-                  : "https://via.placeholder.com/50",
-              }}
+              source={getValidImageSource(item.imagen_restaurante)}
               style={styles.logo}
               resizeMode="cover"
             />

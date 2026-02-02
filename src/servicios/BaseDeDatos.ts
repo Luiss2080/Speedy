@@ -1,14 +1,20 @@
+import Constants from "expo-constants";
 import { Platform } from "react-native";
 
 const getApiUrl = () => {
-  // --- CONFIGURACIÓN DINÁMICA ---
-  // El script start_app.js establece la IP correcta en el entorno de Expo.
-  // Esto permite que 'hostUri' siempre tenga la IP de tu red actual.
+  // --- CONFIGURACIÓN DINÁMICA DE IP ---
+  // Detecta automáticamente la IP de tu computadora (Metro Server)
 
-  // 1. Web
   if (Platform.OS === "web") return "http://localhost:3000/api";
 
-  // 3. Fallback (Solo si todo falla)
+  // Intenta obtener la IP del host de Expo
+  const hostUri = Constants.expoConfig?.hostUri;
+  if (hostUri) {
+    const ip = hostUri.split(":")[0];
+    return `http://${ip}:3000/api`;
+  }
+
+  // Fallback (Solo si todo falla) - Puedes dejar una por defecto o localhost
   return "http://192.168.1.15:3000/api";
 };
 

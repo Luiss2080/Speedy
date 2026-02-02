@@ -40,7 +40,7 @@ export const FavoritosProvider = ({
 
   const fetchFavoritos = async (usuarioId: number) => {
     try {
-      const res = await fetch(`${API_URL}/api/favoritos/${usuarioId}`);
+      const res = await fetch(`${API_URL}/favoritos/${usuarioId}`);
       const data = await res.json();
       if (Array.isArray(data)) {
         setFavoritos(
@@ -66,7 +66,7 @@ export const FavoritosProvider = ({
     if (esFav) {
       setFavoritos((prev) => prev.filter((f) => f.id !== producto.id));
       try {
-        await fetch(`${API_URL}/api/favoritos`, {
+        await fetch(`${API_URL}/favoritos`, {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -87,7 +87,7 @@ export const FavoritosProvider = ({
       };
       setFavoritos((prev) => [...prev, newFav]);
       try {
-        await fetch(`${API_URL}/api/favoritos`, {
+        await fetch(`${API_URL}/favoritos`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

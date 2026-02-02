@@ -1,135 +1,287 @@
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import {
+  FlatList,
   Image,
-  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-
-const CATEGORIES = [
-  { id: 1, name: "Hamburguesas", icon: "hamburger" },
-  { id: 2, name: "Pizza", icon: "pizza-slice" },
-  { id: 3, name: "Sushi", icon: "fish" },
-  { id: 4, name: "Bebidas", icon: "beer" },
-  { id: 5, name: "Postres", icon: "ice-cream" },
-];
+import { useExplorarControlador } from "../../controladores/useExplorarControlador";
 
 export default function ExplorarCompletoVista() {
   const router = useRouter();
-  const [search, setSearch] = useState("");
+  const {
+    busqueda,
+    setBusqueda,
+    recursosFiltrados,
+    categoriaActiva,
+    setCategoriaActiva,
+    categorias,
+  } = useExplorarControlador();
 
-  return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
-      <View style={styles.header}>
-        <View style={styles.searchBar}>
-          <FontAwesome5 name="search" size={16} color="#94A3B8" />
-          <TextInput
-            style={styles.input}
-            placeholder="Busca comida, restaurantes..."
-            placeholderTextColor="#94A3B8"
-            value={search}
-            onChangeText={setSearch}
-            autoFocus={false}
-          />
+  const getValidImageSource = (image: string | null | undefined) => {
+    if (!image) return { uri: "https://via.placeholder.com/150" };
+    if (image.startsWith("http")) return { uri: image };
+    // Consistent picsum fallback
+    let hash = 0;
+    for (let i = 0; i < image.length; i++) {
+      hash = (hash << 5) - hash + image.charCodeAt(i);
+      hash |= 0;
+    }
+    const seed = Math.abs(hash);
+    return { uri: `https://picsum.photos/seed/${seed}/200` };
+  };
+
+  const renderItem = ({ item }: { item: any }) => (
+    <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.9}
+      onPress={() => router.push(`/producto/${item.id}`)}
+    >
+      <View style={styles.imageContainer}>
+        <Image
+          source={getValidImageSource(item.imagen)}
+          style={styles.cardImage}
+          resizeMode="cover"
+        />
+        <View style={styles.categoryBadge}>
+          <Text style={styles.categoryText}>{item.categoria}</Text>
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scroll}>
-        <Text style={styles.sectionTitle}>¿Qué se te antoja?</Text>
-        <View style={styles.grid}>
-          {CATEGORIES.map((cat) => (
-            <TouchableOpacity key={cat.id} style={styles.catCard}>
-              <View style={styles.iconCircle}>
-                <FontAwesome5 name={cat.icon} size={24} color="#EA052C" />
-              </View>
-              <Text style={styles.catName}>{cat.name}</Text>
-            </TouchableOpacity>
-          ))}
+      <View style={styles.cardContent}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.cardTitle} numberOfLines={1}>
+            {item.titulo}
+          </Text>
+          <Text style={styles.cardDesc} numberOfLines={2}>
+            {item.descripcion}
+          </Text>
+        </View>
+        <TouchableOpacity style={styles.addButton}>
+          <FontAwesome5 name="plus" size={14} color="#fff" />
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  );
+
+  return (
+    <SafeAreaView style={styles.container} edges={["top"]}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <View style={styles.header}>
+          <Text style={styles.screenTitle}>Explorar</Text>
+          <View style={styles.searchBar}>
+            <FontAwesome5 name="search" size={16} color="#94A3B8" />
+            <TextInput
+              style={styles.input}
+              placeholder="¿Qué se te antoja hoy?"
+              placeholderTextColor="#94A3B8"
+              value={busqueda}
+              onChangeText={setBusqueda}
+            />
+            {busqueda.length > 0 && (
+              <TouchableOpacity onPress={() => setBusqueda("")}>
+                <FontAwesome5 name="times-circle" size={16} color="#94A3B8" />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <FlatList
+            data={categorias}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item}
+            style={styles.tagsContainer}
+            contentContainerStyle={{ paddingHorizontal: 5 }}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() => setCategoriaActiva(item)}
+                style={[
+                  styles.tag,
+                  categoriaActiva === item && styles.tagActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.tagText,
+                    categoriaActiva === item && styles.tagTextActive,
+                  ]}
+                >
+                  {item}
+                </Text>
+              </TouchableOpacity>
+            )}
+          />
         </View>
 
-        <Text style={[styles.sectionTitle, { marginTop: 30 }]}>Tendencias</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.trendsScroll}
-        >
-          {[1, 2, 3].map((i) => (
-            <TouchableOpacity key={i} style={styles.trendCard}>
-              <Image
-                source={{
-                  uri: `https://source.unsplash.com/random/200x200?food,${i}`,
-                }}
-                style={styles.trendImage}
-              />
-              <View style={styles.trendOverlay}>
-                <Text style={styles.trendText}>Promo 50%</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </ScrollView>
+        <FlatList
+          data={recursosFiltrados}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <FontAwesome5 name="search" size={48} color="#CBD5E1" />
+              <Text style={styles.emptyText}>No encontramos resultados.</Text>
+              <Text style={styles.emptySubtext}>
+                Intenta con otra categoría.
+              </Text>
+            </View>
+          }
+        />
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
-  header: { padding: 20, borderBottomWidth: 1, borderBottomColor: "#F1F5F9" },
-  searchBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F8FAFC",
-    paddingHorizontal: 15,
-    height: 50,
-    borderRadius: 12,
+  container: { flex: 1, backgroundColor: "#F8FAFC" },
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 15,
+    paddingBottom: 10,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#F1F5F9",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
+    elevation: 3,
+    zIndex: 10,
   },
-  input: { flex: 1, marginLeft: 10, fontSize: 16, color: "#1E293B" },
-  scroll: { padding: 20 },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
+  screenTitle: {
+    fontSize: 28,
+    fontWeight: "800",
     color: "#1E293B",
     marginBottom: 15,
   },
-  grid: { flexDirection: "row", flexWrap: "wrap", gap: 15 },
-  catCard: { width: "30%", alignItems: "center", marginBottom: 15 },
-  iconCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#FEF2F2",
+  searchBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F1F5F9",
+    paddingHorizontal: 15,
+    height: 48,
+    borderRadius: 12,
+    marginBottom: 15,
+  },
+  input: { flex: 1, marginLeft: 10, fontSize: 16, color: "#1E293B" },
+  tagsContainer: { maxHeight: 40 },
+  tag: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: "#F1F5F9",
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  tagActive: {
+    backgroundColor: "#EA052C",
+    borderColor: "#EA052C",
+  },
+  tagText: { color: "#64748B", fontWeight: "600", fontSize: 13 },
+  tagTextActive: { color: "#fff" },
+
+  list: { padding: 20, paddingBottom: 100 },
+
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    marginBottom: 20,
+    shadowColor: "#64748B",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#E2E8F0", // Subtle border
+  },
+  imageContainer: {
+    height: 160,
+    width: "100%",
+    backgroundColor: "#E2E8F0",
+    position: "relative",
+  },
+  cardImage: { width: "100%", height: "100%" },
+  categoryBadge: {
+    position: "absolute",
+    top: 12,
+    left: 12,
+    backgroundColor: "rgba(255,255,255,0.95)",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  categoryText: {
+    fontSize: 10,
+    fontWeight: "800",
+    color: "#EA052C",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+
+  cardContent: {
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  cardTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#1E293B",
+    marginBottom: 4,
+  },
+  cardDesc: {
+    fontSize: 13,
+    color: "#64748B",
+    lineHeight: 18,
+    marginRight: 10,
+  },
+  addButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#EA052C",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 8,
+    shadowColor: "#EA052C",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  catName: { fontSize: 12, fontWeight: "500", color: "#475569" },
-  trendsScroll: { marginHorizontal: -20, paddingHorizontal: 20 },
-  trendCard: {
-    width: 140,
-    height: 140,
-    marginRight: 15,
-    borderRadius: 12,
-    overflow: "hidden",
+
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 60,
   },
-  trendImage: { width: "100%", height: "100%" },
-  trendOverlay: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 8,
-    backgroundColor: "rgba(0,0,0,0.6)",
+  emptyText: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#475569",
+    marginTop: 20,
   },
-  trendText: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "bold",
-    textAlign: "center",
+  emptySubtext: {
+    fontSize: 14,
+    color: "#94A3B8",
+    marginTop: 5,
   },
 });

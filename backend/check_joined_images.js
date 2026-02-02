@@ -11,7 +11,7 @@ async function checkPedidosImages() {
 
   try {
     const [rows] = await connection.query(`
-        SELECT p.id, p.restaurant_id, r.nombre, r.imagen_portada 
+        SELECT p.id, p.restaurante_id, r.nombre, r.imagen_portada 
         FROM pedidos p 
         LEFT JOIN restaurantes r ON p.restaurante_id = r.id 
         LIMIT 5

@@ -47,7 +47,10 @@ export default function ClienteHomeVista() {
     >
       <Image
         source={{
-          uri: rest.imagen_portada || "https://via.placeholder.com/300",
+          uri: rest.imagen_portada?.startsWith("http")
+            ? rest.imagen_portada
+            : `https://images.unsplash.com/photo-${rest.imagen_portada}` ||
+              "https://via.placeholder.com/300",
         }}
         style={styles.cardImage}
       />

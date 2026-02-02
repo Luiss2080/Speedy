@@ -15,7 +15,9 @@ const getApiUrl = () => {
   }
 
   // Fallback (Solo si todo falla) - Puedes dejar una por defecto o localhost
-  return "http://192.168.1.15:3000/api";
+  // FOR DEBUGGING: Use your machine's local IP if testing on device, or localhost for emulator
+  return "http://localhost:3000/api";
+  // return "http://192.168.1.15:3000/api";
 };
 
 export const API_URL = getApiUrl();

@@ -4,14 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Linking,
-  Modal,
+  Platform,
   ScrollView,
+  StatusBar,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from "react-native-maps";
-import { SeguimientoEstilos } from "../estilos/SeguimientoEstilos";
+import MapView from "react-native-maps";
 import { API_URL } from "../servicios/BaseDeDatos";
 
 const interpolate = (start: number, end: number, factor: number) => {
@@ -53,10 +53,16 @@ export default function SeguimientoVista() {
       setPedido(data);
 
       // Setup locations
-      const startLat = data.repartidor_lat || data.restaurante_lat || -12.125;
-      const startLon = data.repartidor_lon || data.restaurante_lon || -77.025;
-      const endLat = startLat + 0.01;
-      const endLon = startLon + 0.01;
+      const startLat =
+        parseFloat(data.repartidor_lat) ||
+        parseFloat(data.restaurante_lat) ||
+        -12.125;
+      const startLon =
+        parseFloat(data.repartidor_lon) ||
+        parseFloat(data.restaurante_lon) ||
+        -77.025;
+      const endLat = startLat + 0.005; // Make distance closer for demo visibility
+      const endLon = startLon + 0.005;
 
       const start = { latitude: startLat, longitude: startLon };
       const end = { latitude: endLat, longitude: endLon };
@@ -77,57 +83,51 @@ export default function SeguimientoVista() {
   };
 
   const startPickupSimulation = () => {
-    // States: Confirmado -> (3s) En Cocina -> (10s) Listo para retirar
-    setStatus("Pedido Confirmado");
-    setEta("15 min para retirar");
+    setStatus("Confirmado");
+    setEta("15 min");
     setStep(0);
 
     setTimeout(() => {
-      setStatus("Restaurante preparando tu pedido");
+      setStatus("En Cocina");
       setStep(1);
       setProgress(0.3);
-    }, 3000);
+    }, 2000);
 
     setTimeout(() => {
-      setStatus("¡Listo para retirar!");
+      setStatus("Listo para retirar");
       setEta("¡Ven por él!");
       setStep(2);
       setProgress(1);
-    }, 10000);
+    }, 8000);
   };
 
   const startDeliverySimulation = (start: any, end: any) => {
     let t = 0;
-    const duration = 30000;
-    const interval = 100;
+    const duration = 20000; // Faster simulation
+    const interval = 50;
     const stepMove = interval / duration;
 
-    // Initial State
-    setStatus("Buscando conductor...");
+    setStatus("Confirmado");
     setStep(0);
 
     const timer = setInterval(() => {
       t += stepMove;
 
-      // State Machine Logic based on Time 't' (0 to 1)
-      if (t < 0.1) {
-        setStatus("Conductor asignado. Yendo al restaurante.");
+      if (t < 0.2) {
+        setStatus("Preparando");
         setStep(1);
-      } else if (t < 0.3) {
-        setStatus("Recogiendo pedido en restaurante.");
-        setStep(1);
-      } else if (t < 0.9) {
-        setStatus("Conductor en camino a tu dirección.");
+      } else if (t < 0.8) {
+        setStatus("En Camino");
         setStep(2);
       } else {
-        setStatus("¡Tu pedido ha llegado!");
+        setStatus("Entregado");
         setStep(3);
       }
 
       if (t >= 1) {
         t = 1;
         clearInterval(timer);
-        setEta("0 min");
+        setEta("-");
       } else {
         const remainingSecs = Math.ceil((1 - t) * (duration / 1000));
         setEta(`${Math.ceil(remainingSecs / 60)} min`);
@@ -143,278 +143,409 @@ export default function SeguimientoVista() {
   const handleCall = () => {
     if (pedido?.repartidor_telefono)
       Linking.openURL(`tel:${pedido.repartidor_telefono}`);
-    else if (pedido?.restaurante_telefono)
-      Linking.openURL(`tel:${pedido.restaurante_telefono}`); // Fallback for pickup
     else Alert.alert("Info", "No hay teléfono registrado");
   };
 
   if (loading)
     return (
-      <View style={SeguimientoEstilos.contenedor}>
-        <Text>Cargando...</Text>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#f8fafc",
+        }}
+      >
+        <Text style={{ color: "#64748b", fontWeight: "600" }}>
+          Cargando pedido...
+        </Text>
       </View>
     );
 
   const isPickup = pedido.tipo_servicio === "retiro";
 
-  return (
-    <View style={SeguimientoEstilos.contenedor}>
-      <MapView
-        ref={mapRef}
-        style={SeguimientoEstilos.mapaPlaceholder}
-        provider={PROVIDER_DEFAULT}
-        region={{
-          latitude: driverLoc.latitude,
-          longitude: driverLoc.longitude,
-          latitudeDelta: 0.015,
-          longitudeDelta: 0.015,
-        }}
-      >
-        {/* Route Line (Delivery Only) */}
-        {!isPickup && (
-          <Polyline
-            coordinates={[driverLoc, userLoc]}
-            strokeColor="#C21833"
-            strokeWidth={4}
-          />
-        )}
+  // --- UI COMPONENTS ---
 
-        {/* User Marker (only for Delivery) */}
-        {!isPickup && (
-          <Marker
-            coordinate={userLoc}
-            title="Tú"
-            description={pedido.direccion_entrega_texto}
-          >
-            <View
-              style={{
-                backgroundColor: "#C21833",
-                padding: 6,
-                borderRadius: 20,
-                borderWidth: 2,
-                borderColor: "white",
-              }}
-            >
-              <FontAwesome5 name="home" size={14} color="white" />
-            </View>
-          </Marker>
-        )}
-
-        {/* Moving Entity: Driver (Delivery) or Restaurant (Pickup) */}
-        <Marker
-          coordinate={driverLoc}
-          title={isPickup ? "Restaurante" : "Repartidor"}
-        >
-          <View
-            style={{
-              backgroundColor: "#fff",
-              padding: 6,
-              borderRadius: 20,
-              borderWidth: 2,
-              borderColor: "#C21833",
-            }}
-          >
-            <FontAwesome5
-              name={isPickup ? "store" : "motorcycle"}
-              size={18}
-              color="#C21833"
-            />
-          </View>
-        </Marker>
-      </MapView>
-
-      {/* Panel */}
-      <View style={SeguimientoEstilos.panelEstado}>
-        <TouchableOpacity
-          style={{ alignItems: "center", marginBottom: 10 }}
-          onPress={() => setDetalleVisible(true)}
-        >
-          <Text style={{ color: "#64748b", fontSize: 12 }}>
-            Ver detalles del pedido
-          </Text>
-          <FontAwesome5 name="chevron-up" size={12} color="#64748b" />
-        </TouchableOpacity>
-
-        <View style={{ marginBottom: 10 }}>
-          <Text style={SeguimientoEstilos.estadoTitulo}>{status}</Text>
-          <Text style={SeguimientoEstilos.estadoSubtitulo}>
-            {isPickup ? "Tiempo estimado:" : "Llegada estimada:"}{" "}
-            <Text style={{ color: "#C21833", fontWeight: "bold" }}>{eta}</Text>
-          </Text>
-        </View>
-
-        <View style={SeguimientoEstilos.barraProgreso}>
-          <View
-            style={[
-              SeguimientoEstilos.progresoRelleno,
-              { width: `${progress * 100}%` },
-            ]}
-          />
-        </View>
-
-        {/* Info Card */}
-        <View style={SeguimientoEstilos.repartidorInfo}>
-          <View
-            style={[
-              SeguimientoEstilos.avatar,
-              {
-                backgroundColor: "#e2e8f0",
-                justifyContent: "center",
-                alignItems: "center",
-              },
-            ]}
-          >
-            <FontAwesome5
-              name={isPickup ? "store" : "user-alt"}
-              size={20}
-              color="#64748b"
-            />
-          </View>
-          <View style={{ flex: 1, marginLeft: 10 }}>
-            <Text style={SeguimientoEstilos.repartidorNombre}>
-              {isPickup
-                ? pedido.restaurante_nombre
-                : pedido.repartidor_nombre || "Buscando conductor..."}
-            </Text>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Text style={{ fontSize: 12, color: "#64748b", marginRight: 5 }}>
-                {isPickup
-                  ? pedido.restaurante_direccion
-                  : pedido.repartidor_vehiculo || "Moto"}
-              </Text>
-              {!isPickup && pedido.repartidor_id && (
-                <TouchableOpacity
-                  onPress={() =>
-                    router.push(`/repartidor/${pedido.repartidor_id}` as any)
-                  }
-                >
-                  <Text
-                    style={{
-                      fontSize: 12,
-                      color: "#C21833",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Ver Perfil
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          </View>
-          <View style={{ flexDirection: "row", gap: 10 }}>
-            <TouchableOpacity
-              onPress={handleCall}
-              style={{
-                backgroundColor: "#ecfdf5",
-                padding: 10,
-                borderRadius: 50,
-              }}
-            >
-              <FontAwesome5 name="phone-alt" size={20} color="#10b981" />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* QR Code for Pickup */}
-        {isPickup && step === 2 && (
-          <View style={{ alignItems: "center", marginTop: 10 }}>
-            <View
-              style={{
-                padding: 10,
-                backgroundColor: "white",
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: "#ddd",
-              }}
-            >
-              <MaterialCommunityIcons
-                name="qrcode-scan"
-                size={50}
-                color="black"
-              />
-            </View>
-            <Text style={{ fontSize: 10, color: "#666", marginTop: 5 }}>
-              Muestra este código al retirar
-            </Text>
-          </View>
-        )}
-      </View>
-
-      {/* Order Detail Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={detalleVisible}
-        onRequestClose={() => setDetalleVisible(false)}
-      >
+  const TimelineItem = ({
+    title,
+    time,
+    active,
+    completed,
+    isLast,
+  }: {
+    title: string;
+    time: string;
+    active: boolean;
+    completed: boolean;
+    isLast?: boolean;
+  }) => (
+    <View style={{ flexDirection: "row", height: 50 }}>
+      {/* Line & Dot */}
+      <View style={{ alignItems: "center", width: 30 }}>
         <View
           style={{
+            width: 12,
+            height: 12,
+            borderRadius: 6,
+            backgroundColor: completed || active ? "#10b981" : "#e2e8f0",
+            zIndex: 1,
+          }}
+        />
+        {!isLast && (
+          <View
+            style={{
+              width: 2,
+              flex: 1,
+              backgroundColor: completed ? "#10b981" : "#e2e8f0",
+              marginTop: -2,
+              marginBottom: -2,
+            }}
+          />
+        )}
+      </View>
+      {/* Content */}
+      <View style={{ flex: 1, paddingLeft: 10, justifyContent: "flex-start" }}>
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: completed || active ? "bold" : "500",
+            color: completed || active ? "#1e293b" : "#94a3b8",
+          }}
+        >
+          {title}
+        </Text>
+        <Text style={{ fontSize: 12, color: "#94a3b8" }}>{time}</Text>
+      </View>
+    </View>
+  );
+
+  return (
+    <View style={{ flex: 1, backgroundColor: "#F1F5F9" }}>
+      <StatusBar barStyle="dark-content" />
+
+      {/* HEADER */}
+      <View
+        style={{
+          paddingTop: Platform.OS === "android" ? 40 : 50,
+          paddingHorizontal: 20,
+          paddingBottom: 15,
+          backgroundColor: "#fff",
+          flexDirection: "row",
+          alignItems: "center",
+          shadowColor: "#000",
+          shadowOpacity: 0.05,
+          shadowRadius: 5,
+          elevation: 3,
+          zIndex: 10,
+        }}
+      >
+        <TouchableOpacity onPress={() => router.back()}>
+          <FontAwesome5 name="arrow-left" size={20} color="#1e293b" />
+        </TouchableOpacity>
+        <Text
+          style={{
             flex: 1,
-            justifyContent: "flex-end",
-            backgroundColor: "rgba(0,0,0,0.5)",
+            textAlign: "center",
+            fontSize: 18,
+            fontWeight: "bold",
+            color: "#1e293b",
+          }}
+        >
+          Pedido #{pedido.codigo_seguimiento || id}
+        </Text>
+        <View style={{ width: 20 }} />
+      </View>
+
+      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 100 }}>
+        {/* STATUS CARD */}
+        <View
+          style={{
+            backgroundColor: "#fff",
+            borderRadius: 16,
+            marginTop: 10,
+            padding: 20,
+            shadowColor: "#000",
+            shadowOpacity: 0.05,
+            shadowRadius: 10,
+            elevation: 2,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: "bold",
+              color: "#1e293b",
+              marginBottom: 20,
+            }}
+          >
+            Estado del Pedido
+          </Text>
+
+          <TimelineItem
+            title="Confirmado"
+            time="14:30"
+            active={step === 0}
+            completed={step > 0}
+          />
+          <TimelineItem
+            title="Preparando"
+            time="14:35"
+            active={step === 1}
+            completed={step > 1}
+          />
+          <TimelineItem
+            title="En Camino"
+            time="14:50"
+            active={step === 2}
+            completed={step > 2}
+          />
+          <TimelineItem
+            title="Entregado"
+            time="-"
+            active={step === 3}
+            completed={step > 3}
+            isLast
+          />
+        </View>
+
+        {/* DELIVERY INFO CARD */}
+        <View
+          style={{
+            backgroundColor: "#fff",
+            borderRadius: 16,
+            marginTop: 15,
+            padding: 20,
+            flexDirection: "row",
+            alignItems: "center",
+            shadowColor: "#000",
+            shadowOpacity: 0.05,
+            shadowRadius: 10,
+            elevation: 2,
           }}
         >
           <View
             style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: "#fee2e2",
+              justifyContent: "center",
+              alignItems: "center",
+              marginRight: 15,
+            }}
+          >
+            <FontAwesome5 name="map-marker-alt" size={20} color="#C21833" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 12, color: "#94a3b8" }}>
+              Dirección de Entrega
+            </Text>
+            <Text style={{ fontSize: 15, fontWeight: "600", color: "#1e293b" }}>
+              {pedido.direccion_entrega_direccion ||
+                pedido.direccion_entrega_texto ||
+                "Av. Banzer, Calle 3 #450"}
+            </Text>
+          </View>
+        </View>
+
+        {/* DRIVER CARD */}
+        {!isPickup && (
+          <View
+            style={{
               backgroundColor: "#fff",
-              borderTopLeftRadius: 20,
-              borderTopRightRadius: 20,
+              borderRadius: 16,
+              marginTop: 15,
               padding: 20,
-              maxHeight: "60%",
+              flexDirection: "row",
+              alignItems: "center",
+              shadowColor: "#000",
+              shadowOpacity: 0.05,
+              shadowRadius: 10,
+              elevation: 2,
+            }}
+          >
+            <View
+              style={{
+                width: 50,
+                height: 50,
+                borderRadius: 25,
+                backgroundColor: "#e2e8f0",
+                justifyContent: "center",
+                alignItems: "center",
+                marginRight: 15,
+                overflow: "hidden",
+              }}
+            >
+              {pedido.repartidor_foto ? (
+                // Use Image if available, keeping simplistic for now
+                <FontAwesome5 name="user" size={24} color="#64748b" />
+              ) : (
+                <FontAwesome5 name="user" size={24} color="#64748b" />
+              )}
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: "#94a3b8",
+                  textTransform: "uppercase",
+                  fontWeight: "bold",
+                }}
+              >
+                Tu Repartidor
+              </Text>
+              <Text
+                style={{ fontSize: 16, fontWeight: "bold", color: "#1e293b" }}
+              >
+                {pedido.repartidor_nombre || "Buscando..."}
+              </Text>
+              <Text style={{ fontSize: 13, color: "#64748b" }}>
+                {pedido.repartidor_vehiculo || "Honda Cargo"} • 2839-XYZ
+              </Text>
+            </View>
+            <TouchableOpacity
+              onPress={handleCall}
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 22,
+                backgroundColor: "#10b981",
+                justifyContent: "center",
+                alignItems: "center",
+                shadowColor: "#10b981",
+                shadowOpacity: 0.3,
+                shadowRadius: 5,
+                elevation: 3,
+              }}
+            >
+              <FontAwesome5 name="phone-alt" size={18} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* ORDER SUMMARY */}
+        <View
+          style={{
+            backgroundColor: "#fff",
+            borderRadius: 16,
+            marginTop: 15,
+            padding: 20,
+            shadowColor: "#000",
+            shadowOpacity: 0.05,
+            shadowRadius: 10,
+            elevation: 2,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: "bold",
+              color: "#1e293b",
+              marginBottom: 15,
+            }}
+          >
+            Resumen
+          </Text>
+          {pedido.items?.map((item: any, i: number) => (
+            <View
+              key={i}
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginBottom: 10,
+                borderBottomWidth: i === pedido.items.length - 1 ? 0 : 1,
+                borderColor: "#f1f5f9",
+                paddingBottom: i === pedido.items.length - 1 ? 0 : 8,
+              }}
+            >
+              <Text style={{ color: "#334155" }}>
+                <Text style={{ fontWeight: "bold" }}>{item.cantidad}x</Text>{" "}
+                {item.nombre || "Producto"}
+              </Text>
+              <Text style={{ fontWeight: "600", color: "#334155" }}>
+                ${parseFloat(item.precio_unitario).toFixed(2)}
+              </Text>
+            </View>
+          ))}
+          <View
+            style={{
+              marginTop: 15,
+              paddingTop: 15,
+              borderTopWidth: 1,
+              borderColor: "#e2e8f0",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
             <Text
-              style={{ fontSize: 20, fontWeight: "bold", marginBottom: 15 }}
+              style={{ fontSize: 16, fontWeight: "bold", color: "#0f172a" }}
             >
-              Detalle del Pedido
+              Total Pagado
             </Text>
-            <ScrollView>
-              {pedido.items?.map((item: any, index: number) => (
-                <View
-                  key={index}
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    marginBottom: 10,
-                    borderBottomWidth: 1,
-                    borderBottomColor: "#f1f5f9",
-                    paddingBottom: 5,
-                  }}
-                >
-                  <Text style={{ fontWeight: "600" }}>
-                    {item.cantidad}x Prod
-                  </Text>
-                  <Text>${parseFloat(item.precio_unitario).toFixed(2)}</Text>
-                </View>
-              ))}
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginTop: 10,
-                }}
-              >
-                <Text style={{ fontWeight: "bold" }}>Total</Text>
-                <Text style={{ fontWeight: "bold", color: "#C21833" }}>
-                  ${parseFloat(pedido.total_final).toFixed(2)}
-                </Text>
-              </View>
-            </ScrollView>
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#C21833",
-                padding: 15,
-                borderRadius: 10,
-                alignItems: "center",
-                marginTop: 20,
-              }}
-              onPress={() => setDetalleVisible(false)}
+            <Text
+              style={{ fontSize: 20, fontWeight: "bold", color: "#C21833" }}
             >
-              <Text style={{ color: "#fff", fontWeight: "bold" }}>Cerrar</Text>
-            </TouchableOpacity>
+              ${parseFloat(pedido.total_final).toFixed(2)}
+            </Text>
           </View>
         </View>
-      </Modal>
+
+        {/* BOTTOM ICONS (Extra Actions) */}
+        <View
+          style={{
+            marginTop: 20,
+            flexDirection: "row",
+            justifyContent: "space-around",
+          }}
+        >
+          <TouchableOpacity
+            style={{ alignItems: "center" }}
+            onPress={() => router.push("/ayuda" as any)}
+          >
+            <View
+              style={{
+                width: 50,
+                height: 50,
+                borderRadius: 25,
+                backgroundColor: "#fff",
+                justifyContent: "center",
+                alignItems: "center",
+                marginBottom: 5,
+                elevation: 2,
+              }}
+            >
+              <MaterialCommunityIcons
+                name="face-agent"
+                size={24}
+                color="#64748b"
+              />
+            </View>
+            <Text style={{ fontSize: 12, color: "#64748b" }}>Soporte</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={{ alignItems: "center" }}
+            onPress={() => Alert.alert("Cancelar", "Contacta a soporte")}
+          >
+            <View
+              style={{
+                width: 50,
+                height: 50,
+                borderRadius: 25,
+                backgroundColor: "#fff",
+                justifyContent: "center",
+                alignItems: "center",
+                marginBottom: 5,
+                elevation: 2,
+              }}
+            >
+              <MaterialCommunityIcons name="cancel" size={24} color="#ef4444" />
+            </View>
+            <Text style={{ fontSize: 12, color: "#64748b" }}>Cancelar</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </View>
   );
 }

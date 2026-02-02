@@ -1,7 +1,7 @@
 const mysql = require("mysql2/promise");
 require("dotenv").config();
 
-async function checkProductCols() {
+async function checkOneProduct() {
   const connection = await mysql.createConnection({
     host: process.env.DB_HOST || "localhost",
     user: process.env.DB_USER || "root",
@@ -10,8 +10,13 @@ async function checkProductCols() {
   });
 
   try {
-    const [rows] = await connection.query("DESCRIBE productos");
-    console.log("ALL PRODUCT COLS:", JSON.stringify(rows.map((r) => r.Field)));
+    const [rows] = await connection.query("SELECT * FROM productos LIMIT 1");
+    if (rows.length > 0) {
+      console.log("PRODUCT KEYS:", Object.keys(rows[0]).join(", "));
+      console.log("PRODUCT DATA:", JSON.stringify(rows[0], null, 2));
+    } else {
+      console.log("No products found.");
+    }
   } catch (error) {
     console.error(error);
   } finally {
@@ -19,4 +24,4 @@ async function checkProductCols() {
   }
 }
 
-checkProductCols();
+checkOneProduct();

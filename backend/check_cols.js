@@ -1,7 +1,7 @@
 const mysql = require("mysql2/promise");
 require("dotenv").config();
 
-async function checkSchema() {
+async function checkCols() {
   const connection = await mysql.createConnection({
     host: process.env.DB_HOST || "localhost",
     user: process.env.DB_USER || "root",
@@ -10,11 +10,13 @@ async function checkSchema() {
   });
 
   try {
-    // const [rows] = await connection.query("DESCRIBE usuarios");
-    // console.log("USERS SCHEMA:", JSON.stringify(rows, null, 2));
+    const [uRows] = await connection.query("DESCRIBE usuarios");
+    console.log("USERS COLUMNS: " + uRows.map((r) => r.Field).join(", "));
 
-    const [repRows] = await connection.query("DESCRIBE repartidores");
-    console.log("REPARTIDORES SCHEMA:", JSON.stringify(repRows, null, 2));
+    const [rRows] = await connection.query("DESCRIBE repartidores");
+    console.log(
+      "REPARTIDORES COLUMNS: " + rRows.map((r) => r.Field).join(", "),
+    );
   } catch (error) {
     console.error(error);
   } finally {
@@ -22,4 +24,4 @@ async function checkSchema() {
   }
 }
 
-checkSchema();
+checkCols();

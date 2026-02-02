@@ -89,6 +89,7 @@ export default function HistorialPedidosVista() {
 
   const renderItem = ({ item }: { item: any }) => {
     const statusStyle = getStatusColor(item.estado);
+    const date = new Date(item.fecha_creacion);
 
     return (
       <TouchableOpacity
@@ -115,12 +116,12 @@ export default function HistorialPedidosVista() {
               resizeMode="cover"
             />
             <View style={{ marginLeft: 12 }}>
-              <Text style={styles.restName}>
+              <Text style={styles.restName} numberOfLines={1}>
                 {item.nombre_restaurante || "Restaurante"}
               </Text>
               <Text style={styles.dateText}>
-                {new Date(item.fecha_creacion).toLocaleDateString()} •{" "}
-                {new Date(item.fecha_creacion).toLocaleTimeString([], {
+                {date.toLocaleDateString()} •{" "}
+                {date.toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
@@ -225,6 +226,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F1F5F9",
   },
   title: { fontSize: 28, fontWeight: "800", color: "#1E293B" },
   filterBtn: {
@@ -278,6 +281,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#1E293B",
     marginBottom: 2,
+    maxWidth: 150,
   },
   dateText: { fontSize: 12, color: "#94A3B8" },
 

@@ -20,22 +20,22 @@ async function forceSeed() {
     // Try minimal columns first: id, nombre, email, password, rol
     await connection.query(
       "INSERT IGNORE INTO usuarios (id, nombre, email, password, rol) VALUES (?, ?, ?, ?, ?)",
-      [1, 'Usuario Demo', 'demo@speedy.com', '123456', 'cliente']
+      [1, "Usuario Demo", "demo@speedy.com", "123456", "cliente"],
     );
 
     // 3. Insert Driver
     console.log("Inserting Driver...");
     await connection.query(
       "INSERT IGNORE INTO usuarios (id, nombre, email, password, rol) VALUES (?, ?, ?, ?, ?)",
-      [2, 'Repartidor Demo', 'repartidor@speedy.com', 'demo123', 'repartidor']
+      [2, "Repartidor Demo", "repartidor@speedy.com", "demo123", "repartidor"],
     );
 
     // 4. Link Driver Profile
     // Check if repartidores table exists and has these columns. Assuming yes based on migration 005.
     console.log("Linking Driver Profile...");
     await connection.query(
-        -77.025,
-      ],
+      "INSERT IGNORE INTO repartidores (id, usuario_id, nombre, tipo_vehiculo, modelo_vehiculo, estado) VALUES (?, ?, ?, ?, ?, ?)",
+      [1, 2, "Repartidor Demo", "moto", "Honda Cargo 150", "disponible"],
     );
 
     console.log("✅ Force Seed Completed.");

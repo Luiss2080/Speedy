@@ -65,7 +65,7 @@ export default function LoginVista() {
     setIsLoading(false);
 
     if (res.success) {
-      login(res.user, res.repartidor);
+      login(res.user, res.repartidor, res.token);
       if (res.user.rol === "repartidor") {
         router.replace("/(driver-tabs)/" as any);
       } else {

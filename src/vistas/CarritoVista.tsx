@@ -11,7 +11,7 @@ import {
 import { useCarritoControlador } from "../controladores/useCarritoControlador";
 import { CarritoEstilos } from "../estilos/CarritoEstilos";
 import { API_URL } from "../servicios/BaseDeDatos";
-import { useAuthStore } from "../stores/useAuthStore";
+import { authHeaders, useAuthStore } from "../stores/useAuthStore";
 
 export default function CarritoVista() {
   const {
@@ -53,7 +53,9 @@ export default function CarritoVista() {
 
   const fetchTarjetas = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/pagos/${user?.id}`);
+      const res = await fetch(`${API_URL}/api/pagos/${user?.id}`, {
+        headers: authHeaders(),
+      });
       const data = await res.json();
       setTarjetas(data);
       if (data.length > 0 && !tarjetaSeleccionada) {

@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { MetodosPagoEstilos } from "../estilos/MetodosPagoEstilos";
 import { API_URL } from "../servicios/BaseDeDatos";
-import { useAuthStore } from "../stores/useAuthStore";
+import { authHeaders, useAuthStore } from "../stores/useAuthStore";
 
 export default function MetodosPagoVista() {
   const router = useRouter();
@@ -34,7 +34,9 @@ export default function MetodosPagoVista() {
     if (!user) return;
     try {
       setLoading(true);
-      const res = await fetch(`${API_URL}/api/pagos/${user.id}`);
+      const res = await fetch(`${API_URL}/api/pagos/${user.id}`, {
+        headers: authHeaders(),
+      });
       const data = await res.json();
       setTarjetas(data);
     } catch (error) {
@@ -52,7 +54,7 @@ export default function MetodosPagoVista() {
     try {
       await fetch(`${API_URL}/api/pagos`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({
           usuario_id: user?.id,
           marca,
@@ -71,6 +73,7 @@ export default function MetodosPagoVista() {
     try {
       await fetch(`${API_URL}/api/pagos/${id}`, {
         method: "DELETE",
+        headers: authHeaders(),
       });
       loadTarjetas();
     } catch (error) {

@@ -1,50 +1,155 @@
-# Welcome to your Expo app 👋
+<div align="center">
+  <img src="docs/assets/logo.svg" width="96" alt="Logo de Speedy" />
+  <h1>Speedy</h1>
+  <p><b>App móvil de delivery de comida con vistas de cliente y de repartidor, hecha con React Native (Expo) y una API Express + MySQL.</b></p>
+  <img src="https://img.shields.io/badge/estado-prototipo%20funcional-orange?style=for-the-badge" alt="Estado: prototipo funcional" />
+  <img src="https://img.shields.io/badge/Expo-54-000020?style=for-the-badge&logo=expo" alt="Expo 54" />
+  <img src="https://img.shields.io/badge/React%20Native-0.81-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React Native 0.81" />
+  <img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript 5.9" />
+  <img src="https://img.shields.io/badge/Express-4-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Express 4" />
+  <img src="https://img.shields.io/badge/MySQL-mysql2-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL" />
+  <img src="https://img.shields.io/badge/tests-0-lightgrey?style=for-the-badge" alt="Sin tests" />
+  <img src="https://img.shields.io/badge/licencia-MIT-green?style=for-the-badge" alt="Licencia MIT" />
+  <p>
+    <a href="#-inicio-rápido">Inicio rápido</a> ·
+    <a href="#-características">Características</a> ·
+    <a href="#-arquitectura">Arquitectura</a> ·
+    <a href="#-pruebas">Pruebas</a> ·
+    <a href="#-lo-que-todavía-no-existe">Limitaciones</a>
+  </p>
+</div>
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Speedy es un **prototipo** de app de delivery: el cliente explora restaurantes y productos, arma un carrito, crea pedidos y guarda favoritos, direcciones y métodos de pago; el repartidor tiene su propio conjunto de pantallas. Consta de una app Expo (Expo Router) y un backend Express + MySQL en `backend/`. **No es** una plataforma lista para producción: la autenticación es básica y parte del flujo del repartidor y del seguimiento es simulado (ver [limitaciones](#-lo-que-todavía-no-existe)).
 
-## Get started
+## 🎬 Vista rápida
 
-1. Install dependencies
+No se incluyen capturas: la app necesita un emulador o dispositivo y una base MySQL con datos sembrados. Flujo principal tal como está implementado:
 
-   ```bash
-   npm install
-   ```
+```text
+Login (usuario/correo + contraseña) ──► rol cliente ─────► Inicio · Explorar · Pedidos · Perfil
+                                    └─► rol repartidor ──► Inicio · Ganancias · Perfil
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+Cliente:    Restaurante ─► Producto ─► Carrito ─► (cupón) ─► Crear pedido ─► Seguimiento (simulado)
+Repartidor: Pedido ─► Aceptar ─► Entrega activa ─► Completar   (pantallas con datos de ejemplo)
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## ✨ Características
 
-## Learn more
+| Característica | Detalle |
+| --- | --- |
+| Dos roles | Tras el login se abre `app/(client-tabs)` o `app/(driver-tabs)` según `usuarios.rol` (`cliente` / `repartidor`). |
+| Catálogo | Categorías, restaurantes y productos (con detalle) leídos de la API (`/api/categorias`, `/api/restaurantes`, `/api/productos`). |
+| Carrito | Estado en `ContextoCarrito` y pantalla de carrito; el pedido se envía a `POST /api/pedidos`. |
+| Pedidos | El backend crea el pedido y su detalle dentro de una transacción MySQL y asigna un repartidor `disponible` si es delivery. Listado y detalle de pedidos. |
+| Cupones | `POST /api/cupones/validar` reconoce tres códigos fijos escritos en el código (`WELCOME20`, `ENVIOFREE`, `SPEEDY5`); no lee la tabla `cupones`. |
+| Favoritos, direcciones, métodos de pago, notificaciones | Endpoints propios en la API y pantallas correspondientes en `app/`. |
+| Sesión persistente | Store de Zustand con `AsyncStorage` (`useAuthStore`). |
+| Seguimiento con mapa | `react-native-maps` con una animación **simulada en el cliente** (temporizador de 20 s); no lee la posición real de un repartidor. |
+| Ganancias del repartidor | Consulta pedidos `entregado` por repartidor a la API. |
 
-To learn more about developing your project with Expo, look at the following resources:
+## 🏗️ Arquitectura
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```mermaid
+flowchart LR
+    subgraph App["App Expo (app/ + src/)"]
+        R["Expo Router<br/>(client-tabs / driver-tabs)"]
+        V["Vistas + Controladores<br/>(patrón MVC en español)"]
+        S["Zustand + Context<br/>(sesión, carrito, favoritos)"]
+        SVC["servicios/BaseDeDatos.ts<br/>(fetch a la API)"]
+        R --> V --> S
+        V --> SVC
+    end
+    subgraph API["backend/server.js (Express)"]
+        E["Endpoints /api/*"]
+        P["Pool mysql2"]
+        E --> P
+    end
+    DB[("MySQL<br/>base Speedy")]
+    SVC -- "HTTP :3000" --> E
+    P --> DB
+```
 
-## Join the community
+<details>
+<summary>Estructura de carpetas</summary>
 
-Join our community of developers creating universal apps.
+```text
+app/                Rutas de Expo Router: (client-tabs), (driver-tabs), carrito, producto, restaurante, seguimiento, perfil…
+src/vistas/         Pantallas (subcarpetas cliente/ y repartidor/)
+src/controladores/  Hooks con la lógica de cada pantalla
+src/estilos/        Estilos por pantalla
+src/context/        Carrito y favoritos (Context API)
+src/stores/         useAuthStore (Zustand + AsyncStorage)
+src/servicios/      BaseDeDatos.ts: cliente HTTP hacia la API
+src/modelos/        Tipos TypeScript
+backend/            server.js (API), migrate.js, migrations/*.sql, scripts de siembra y diagnóstico
+database/           Esquema y datos iniciales alternativos
+docs/               Documentación (estructura, comandos, esquema de BD, guía maestra)
+```
+</details>
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## 🚀 Inicio rápido
+
+| Requisito | Notas |
+| --- | --- |
+| Node.js | Sin `engines` declarado; Expo 54 requiere una versión LTS reciente |
+| MySQL | Servidor local (p. ej. Laragon o XAMPP) |
+| Expo Go o emulador | Para ejecutar en móvil |
+
+1. Instala las dependencias de la app y del backend:
+   ```bash
+   npm install
+   cd backend && npm install
+   ```
+2. Configura `backend/.env` (`PORT`, `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`; la base por defecto se llama `Speedy`).
+3. Crea el esquema y los datos de ejemplo (el script crea la base si no existe y aplica `backend/migrations/*.sql`):
+   ```bash
+   cd backend && node migrate.js
+   ```
+4. Arranca la API y luego la app:
+   ```bash
+   cd backend && npm start     # API en http://0.0.0.0:3000
+   npx expo start              # desde la raíz; también npm run android | ios | web
+   ```
+5. En un dispositivo físico la app deduce la IP del servidor desde Expo; si aparece `Network request failed`, fija tu IP en `src/servicios/BaseDeDatos.ts` (ver `ARCHITECTURE.md`).
+
+> No pude ejecutar estos pasos en esta revisión (requieren MySQL y un dispositivo); los comandos salen de `package.json`, `backend/package.json` y `backend/migrate.js`.
+
+<details>
+<summary>Variables de entorno (backend/.env)</summary>
+
+| Variable | Uso | Valor por defecto en el código |
+| --- | --- | --- |
+| `PORT` | Puerto de la API | `3000` |
+| `DB_HOST` | Host MySQL | `localhost` |
+| `DB_USER` | Usuario MySQL | `root` |
+| `DB_PASSWORD` | Contraseña MySQL | vacío |
+| `DB_NAME` | Nombre de la base | `Speedy` |
+</details>
+
+## 🧪 Pruebas
+
+No existen pruebas automatizadas ni CI. Solo hay `npm run lint` (`expo lint`, ESLint con `eslint-config-expo`). Los scripts `backend/check_*.js` y `backend/seed_*.js` son utilidades de diagnóstico y siembra, no tests.
+
+## 🔒 Seguridad
+
+Estado real, **no apto para producción**:
+
+- `POST /api/login` compara la contraseña **en texto plano** con `usuarios.password` y no emite token; el resto de endpoints no verifica sesión.
+- `cors()` está abierto a cualquier origen.
+- `backend/.env` (credenciales de MySQL de desarrollo) y `CREDENCIALES.md` (usuarios de prueba) **están versionados** en el repositorio. Rota lo que hayas usado y saca `.env` del control de versiones.
+
+## 🚧 Lo que todavía no existe
+
+- Autenticación real: hash de contraseñas, tokens y autorización por rol en la API.
+- Seguimiento en tiempo real: mapa y estado se animan con un temporizador local; no hay WebSockets ni GPS del repartidor.
+- Flujo de repartidor conectado: `PedidoAceptacionVista` usa datos de ejemplo y no llama a la API; no hay endpoint para cambiar el estado de un pedido.
+- Cupones desde base de datos (hoy son tres códigos fijos en `server.js`).
+- Pagos reales: los métodos de pago solo se guardan y listan.
+- Pruebas automatizadas, CI y guía de despliegue.
+- El README anterior era la plantilla de `create-expo-app` y no describía el proyecto.
+
+## 📄 Licencia
+
+[MIT](LICENSE).
+
+<div align="center"><sub>Hecho por Luiss2080 · Speedy, prototipo de delivery con Expo y Express</sub></div>

@@ -2,11 +2,30 @@ const express = require("express");
 const mysql = require("mysql2/promise");
 const cors = require("cors");
 require("dotenv").config();
+const { createAuthRouter } = require("./routes/auth");
+const { getJwtSecret, requireAuth, requireSelf } = require("./auth");
+
+getJwtSecret(); // falla al arrancar en produccion si falta JWT_SECRET
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+// CORS: lista de origenes web permitidos (CORS_ORIGINS, separados por comas). Las apps nativas
+// no envian cabecera Origin y no se ven afectadas.
+const allowedOrigins = (
+  process.env.CORS_ORIGINS || "http://localhost:8081,http://localhost:19006"
+)
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+app.use(
+  cors({
+    origin: (origin, cb) =>
+      !origin || allowedOrigins.includes(origin)
+        ? cb(null, true)
+        : cb(new Error("Origen no permitido por CORS")),
+  }),
+);
 app.use(express.json());
 
 // Database Connection Pool
@@ -137,38 +156,8 @@ app.get("/api/direcciones", async (req, res) => {
   }
 });
 
-// --- USUARIOS ---
-app.get("/api/usuarios/:id", async (req, res) => {
-  const connection = await pool.getConnection();
-  try {
-    const [rows] = await connection.query(
-      "SELECT * FROM usuarios WHERE id = ?",
-      [req.params.id],
-    );
-    if (rows.length > 0) res.json(rows[0]);
-    else res.status(404).json({ error: "Usuario no encontrado" });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  } finally {
-    connection.release();
-  }
-});
-
-app.put("/api/usuarios/:id", async (req, res) => {
-  const connection = await pool.getConnection();
-  try {
-    const { nombre, email, password } = req.body;
-    await connection.query(
-      "UPDATE usuarios SET nombre = ?, email = ?, password = ? WHERE id = ?",
-      [nombre, email, password, req.params.id],
-    );
-    res.json({ success: true });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  } finally {
-    connection.release();
-  }
-});
+// --- USUARIOS / LOGIN: ver routes/auth.js ---
+app.use("/api", createAuthRouter(pool));
 
 app.post("/api/direcciones", async (req, res) => {
   try {
@@ -184,61 +173,12 @@ app.post("/api/direcciones", async (req, res) => {
   }
 });
 
-// 5. Auth (Login Simple) - Optional if you want real auth later
-app.post("/api/login", async (req, res) => {
-  try {
-    const { email, password } = req.body; // Changed to email field for standard login, or map 'usuario' to it if needed
-    // Assuming 'usuario' from frontend maps to 'nombre' or 'email' in DB. Let's use 'nombre' for simplicity as per current frontend usage.
-    const { usuario } = req.body;
-
-    // Search by name OR email
-    const [rows] = await pool.query(
-      "SELECT * FROM usuarios WHERE (nombre = ? OR email = ?) AND password = ?",
-      [usuario, usuario, password],
-    );
-
-    if (rows.length > 0) {
-      const user = rows[0];
-      let repartidorInfo = null;
-
-      // If user is a repartidor, fetch their specific details
-      if (user.rol === "repartidor") {
-        const [repRows] = await pool.query(
-          "SELECT * FROM repartidores WHERE usuario_id = ?",
-          [user.id],
-        );
-        if (repRows.length > 0) {
-          repartidorInfo = repRows[0];
-        }
-      }
-
-      res.json({
-        success: true,
-        user: {
-          id: user.id,
-          nombre: user.nombre,
-          email: user.email,
-          rol: user.rol,
-          avatar: user.avatar,
-        },
-        repartidor: repartidorInfo,
-      });
-    } else {
-      res
-        .status(401)
-        .json({ success: false, message: "Credenciales inválidas" });
-    }
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 // 5.8. Validar Cupon
 app.post("/api/cupones/validar", async (req, res) => {
   try {
     const { codigo } = req.body;
-    // Simple mock validation for now or check DB if populated
-    // Let's support a few hardcoded ones for demo excellence
+    // DEMO: cupones fijos en codigo (WELCOME20, ENVIOFREE, SPEEDY5); no lee la tabla `cupones`.
+    // Ver README ("Lo que todavia no existe").
     const cupones = {
       WELCOME20: {
         descuento: 20,
@@ -441,25 +381,6 @@ app.get("/api/pedidos/:id", async (req, res) => {
   }
 });
 
-// --- PERFIL DE USUARIO ---
-app.get("/api/usuarios/:id", async (req, res) => {
-  const connection = await pool.getConnection();
-  try {
-    const [rows] = await connection.query(
-      "SELECT id, nombre, email, telefono, avatar FROM usuarios WHERE id = ?",
-      [req.params.id],
-    );
-    if (rows.length === 0)
-      return res.status(404).json({ error: "Usuario no encontrado" });
-    res.json(rows[0]);
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "Error al obtener usuario" });
-  } finally {
-    connection.release();
-  }
-});
-
 // --- FAVORITOS ---
 app.get("/api/favoritos/:usuario_id", async (req, res) => {
   const connection = await pool.getConnection();
@@ -514,7 +435,7 @@ app.delete("/api/favoritos", async (req, res) => {
 });
 
 // --- METODOS DE PAGO ---
-app.get("/api/pagos/:usuario_id", async (req, res) => {
+app.get("/api/pagos/:usuario_id", requireAuth, requireSelf("usuario_id"), async (req, res) => {
   const connection = await pool.getConnection();
   try {
     const [rows] = await connection.query(
@@ -529,13 +450,13 @@ app.get("/api/pagos/:usuario_id", async (req, res) => {
   }
 });
 
-app.post("/api/pagos", async (req, res) => {
+app.post("/api/pagos", requireAuth, async (req, res) => {
   const connection = await pool.getConnection();
   try {
-    const { usuario_id, marca, ultimos_digitos } = req.body;
+    const { marca, ultimos_digitos } = req.body;
     await connection.query(
       "INSERT INTO metodos_pago (usuario_id, marca, ultimos_digitos) VALUES (?, ?, ?)",
-      [usuario_id, marca, ultimos_digitos],
+      [req.userId, marca, ultimos_digitos],
     );
     res.json({ success: true });
   } catch (e) {
@@ -545,12 +466,13 @@ app.post("/api/pagos", async (req, res) => {
   }
 });
 
-app.delete("/api/pagos/:id", async (req, res) => {
+app.delete("/api/pagos/:id", requireAuth, async (req, res) => {
   const connection = await pool.getConnection();
   try {
-    await connection.query("DELETE FROM metodos_pago WHERE id = ?", [
-      req.params.id,
-    ]);
+    await connection.query(
+      "DELETE FROM metodos_pago WHERE id = ? AND usuario_id = ?",
+      [req.params.id, req.userId],
+    );
     res.json({ success: true });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -576,7 +498,11 @@ app.get("/api/notificaciones/:usuario_id", async (req, res) => {
 });
 
 // Start Server
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 Servidor backend corriendo en http://localhost:${PORT}`);
-  console.log(`Available on your network IP as well.`);
-});
+if (require.main === module) {
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`🚀 Servidor backend corriendo en http://localhost:${PORT}`);
+    console.log(`Available on your network IP as well.`);
+  });
+}
+
+module.exports = { app, pool };

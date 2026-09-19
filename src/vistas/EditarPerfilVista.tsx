@@ -10,7 +10,7 @@ import {
   View,
 } from "react-native";
 import { API_URL } from "../../src/servicios/BaseDeDatos";
-import { useAuthStore } from "../../src/stores/useAuthStore";
+import { authHeaders, useAuthStore } from "../../src/stores/useAuthStore";
 
 export default function EditarPerfilVista() {
   const router = useRouter();
@@ -24,7 +24,7 @@ export default function EditarPerfilVista() {
     try {
       await fetch(`${API_URL}/api/usuarios/${user?.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({
           nombre,
           email,

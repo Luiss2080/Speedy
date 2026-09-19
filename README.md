@@ -124,26 +124,28 @@ docs/               Documentación (estructura, comandos, esquema de BD, guía m
 | `DB_USER` | Usuario MySQL | `root` |
 | `DB_PASSWORD` | Contraseña MySQL | vacío |
 | `DB_NAME` | Nombre de la base | `Speedy` |
+| `JWT_SECRET` | Firma de los JWT | obligatorio si `NODE_ENV=production` (en desarrollo usa un valor de prueba) |
+| `CORS_ORIGINS` | Orígenes web permitidos (separados por comas) | `http://localhost:8081,http://localhost:19006` |
 </details>
 
 ## 🧪 Pruebas
 
-No existen pruebas automatizadas ni CI. Solo hay `npm run lint` (`expo lint`, ESLint con `eslint-config-expo`). Los scripts `backend/check_*.js` y `backend/seed_*.js` son utilidades de diagnóstico y siembra, no tests.
+El backend tiene tests con `node:test` (`cd backend && npm test`) para hash de contraseñas, JWT, middleware y las rutas de login/perfil con una base simulada. No hay tests de la app ni CI. Solo hay `npm run lint` (`expo lint`, ESLint con `eslint-config-expo`). Los scripts `backend/check_*.js` y `backend/seed_*.js` son utilidades de diagnóstico y siembra, no tests.
 
 ## 🔒 Seguridad
 
 Estado real, **no apto para producción**:
 
-- `POST /api/login` compara la contraseña **en texto plano** con `usuarios.password` y no emite token; el resto de endpoints no verifica sesión.
-- `cors()` está abierto a cualquier origen.
+- Contraseñas con bcrypt (las cuentas antiguas en texto plano se aceptan una vez y se re-guardan con hash al iniciar sesión). `POST /api/login` devuelve un JWT (HS256, 12 h) firmado con `JWT_SECRET` (obligatorio en producción). Con token y comprobación de propietario: perfil (`/api/usuarios/:id`, que ya no devuelve la contraseña) y métodos de pago (`/api/pagos`). **Sin proteger todavía:** pedidos, favoritos, direcciones, notificaciones y demás rutas.
+- CORS limitado a los orígenes de `CORS_ORIGINS` (por defecto los de Expo web en localhost); las apps nativas no envían `Origin`.
 - `backend/.env` y `CREDENCIALES.md` ya no se versionan (usa `backend/.env.example`; los usuarios de prueba los crean las migraciones/seeds). Como estuvieron en el historial de git, rota las credenciales de MySQL y las contraseñas de los usuarios de prueba que hayas usado.
 
 ## 🚧 Lo que todavía no existe
 
-- Autenticación real: hash de contraseñas, tokens y autorización por rol en la API.
+- Autorización por rol y token en el resto de rutas de la API (hoy solo perfil y métodos de pago).
 - Seguimiento en tiempo real: mapa y estado se animan con un temporizador local; no hay WebSockets ni GPS del repartidor.
 - Flujo de repartidor conectado: `PedidoAceptacionVista` usa datos de ejemplo y no llama a la API; no hay endpoint para cambiar el estado de un pedido.
-- Cupones desde base de datos (hoy son tres códigos fijos en `server.js`).
+- Cupones desde base de datos: **es una demo por diseño**. Hoy `POST /api/cupones/validar` acepta tres códigos fijos escritos en `server.js` (`WELCOME20`, `ENVIOFREE`, `SPEEDY5`) y no lee la tabla `cupones`.
 - Pagos reales: los métodos de pago solo se guardan y listan.
 - Pruebas automatizadas, CI y guía de despliegue.
 - El README anterior era la plantilla de `create-expo-app` y no describía el proyecto.

@@ -100,7 +100,7 @@ docs/               Documentación (estructura, comandos, esquema de BD, guía m
    npm install
    cd backend && npm install
    ```
-2. Configura `backend/.env` (`PORT`, `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`; la base por defecto se llama `Speedy`).
+2. Copia `backend/.env.example` a `backend/.env` y configúralo (`PORT`, `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`; la base por defecto se llama `Speedy`).
 3. Crea el esquema y los datos de ejemplo (el script crea la base si no existe y aplica `backend/migrations/*.sql`):
    ```bash
    cd backend && node migrate.js
@@ -136,7 +136,7 @@ Estado real, **no apto para producción**:
 
 - `POST /api/login` compara la contraseña **en texto plano** con `usuarios.password` y no emite token; el resto de endpoints no verifica sesión.
 - `cors()` está abierto a cualquier origen.
-- `backend/.env` (credenciales de MySQL de desarrollo) y `CREDENCIALES.md` (usuarios de prueba) **están versionados** en el repositorio. Rota lo que hayas usado y saca `.env` del control de versiones.
+- `backend/.env` y `CREDENCIALES.md` ya no se versionan (usa `backend/.env.example`; los usuarios de prueba los crean las migraciones/seeds). Como estuvieron en el historial de git, rota las credenciales de MySQL y las contraseñas de los usuarios de prueba que hayas usado.
 
 ## 🚧 Lo que todavía no existe
 

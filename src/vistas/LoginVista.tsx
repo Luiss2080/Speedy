@@ -23,7 +23,7 @@ const APP_COLOR = "#EA052C";
 
 export default function LoginVista() {
   const router = useRouter();
-  const { login } = useAuthStore();
+  const { login, user, isAuthenticated } = useAuthStore();
 
   const [usuario, setUsuario] = useState("");
   const [password, setPassword] = useState("");
@@ -33,6 +33,17 @@ export default function LoginVista() {
   // Animation Values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
+
+  // En la demo la sesion ya viene sembrada: si hay usuario entra directo, en
+  // vez de quedarse mirando el formulario.
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+    router.replace(
+      user.rol === "repartidor"
+        ? ("/(driver-tabs)/" as any)
+        : ("/(client-tabs)/inicio" as any),
+    );
+  }, [isAuthenticated, user]);
 
   useEffect(() => {
     Animated.parallel([

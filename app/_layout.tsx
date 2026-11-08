@@ -10,8 +10,9 @@ import { CarritoProvider } from "../src/context/ContextoCarrito";
 import { FavoritosProvider } from "../src/context/ContextoFavoritos";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { initDB, seedDB } from "../src/servicios/BaseDeDatos";
+import { DEMO, activarDemo } from "../src/demo/activarDemo";
 
 export const unstable_settings = {
   anchor: "(client-tabs)",
@@ -20,11 +21,23 @@ export const unstable_settings = {
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
+  // En la demo la sesion se siembra antes de pintar: zustand rehidrata el
+  // store al montar y despues ya no vuelve a mirar el almacenamiento.
+  const [demoListo, setDemoListo] = useState(!DEMO);
+
+  useEffect(() => {
+    activarDemo().then(() => setDemoListo(true));
+  }, []);
+
   useEffect(() => {
     initDB()
       .then(() => seedDB())
       .catch((e) => console.error("Error BD:", e));
   }, []);
+
+  if (!demoListo) {
+    return null;
+  }
 
   return (
     <FavoritosProvider>

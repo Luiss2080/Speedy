@@ -3,7 +3,7 @@
 Version de demostracion de Speedy: corre entera en el navegador, sin el
 servidor de `backend/` y sin MySQL.
 
-- **URL:** pendiente de publicar
+- **URL:** https://speedy-763.pages.dev
 - **Usuario:** admin@hagamostech.com
 - **Clave:** password
 
